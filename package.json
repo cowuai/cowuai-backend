@@ -1,0 +1,30 @@
+{
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^6.14.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.14.0",
+    "express": "^5.1.0"
+  },
+  "name": "cowuai-backend",
+  "version": "1.0.0",
+  "description": "Repositório criado para o backend do projeto CowUai desenvolvido para as disciplinas de LabESOF (Laboratório de Engenharia de Software) e DAW2 (Desenvolvimento de Aplicações Web 2) do Instituto Federal do Triângulo Mineiro.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cowuai/cowuai-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cowuai/cowuai-backend/issues"
+  },
+  "homepage": "https://github.com/cowuai/cowuai-backend#readme"
+}
