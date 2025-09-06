@@ -15,7 +15,7 @@ datasource db {
 }
 
 model Usuario {
-  id              BigInt    @id @default(autoincrement()) @db.BigInt
+  id              Int @id @default(autoincrement())
   cpf             String    @unique @db.VarChar(14)
   nome            String    @db.VarChar(255)
   email           String    @unique @db.VarChar(255)
