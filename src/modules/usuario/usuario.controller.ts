@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 import {errorHandler} from "../../middlewares/errorHandler";
 import { usuarioService } from "./usuario.service";
+import bcrypt from "bcrypt"; 
 
 
 export const usuarioController = {
@@ -8,13 +9,14 @@ export const usuarioController = {
     create: async (req: Request, res: Response) => {
         try {
             const { cpf, nome, email, senha, dataNascimento, ativo } = req.body;
+            const hashedPassword = await bcrypt.hash(senha, 10);
 
             const novoUsuario = await usuarioService.create({
                 
                     cpf,
                     nome,
                     email,
-                    senha,
+                    senha: hashedPassword,
                     dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
                     ativo: ativo ?? true,
                 },

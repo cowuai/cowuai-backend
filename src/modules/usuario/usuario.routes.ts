@@ -10,4 +10,4 @@ router.get("/nome/:nome", usuarioController.findByNome);
 router.get("/cpf/:cpf", usuarioController.findByCpf);
 router.get("/email/:email", usuarioController.findByEmail);
 
-module.exports = router;
+export default router;
