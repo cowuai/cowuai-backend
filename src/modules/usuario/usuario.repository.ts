@@ -10,7 +10,15 @@ export const usuarioRepository = {
     }, 
     findByEmail: (email: string) => {
         return prisma.usuario.findUnique({where: {email}});
-    }
+    }, 
+    findAll: () => prisma.usuario.findMany(),
+
+  findById: (id: bigint) =>
+    prisma.usuario.findUnique({ where: { id } }),
+
+  findByNome: (nome: string) =>
+    prisma.usuario.findMany({ where: { nome } }),
+
 
 
 
