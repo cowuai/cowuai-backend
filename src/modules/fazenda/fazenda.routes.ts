@@ -1,14 +1,15 @@
 import {Router} from "express";
 import {fazendaController} from "./fazenda.controller";
+import {authMiddleware} from "../../middlewares/authMiddleware";
 
 const router = Router();
 
-router.post("/", fazendaController.create);
-router.get("/", fazendaController.findAll);
-router.get("/id/:id", fazendaController.findById);
-router.get("/nome/:nome", fazendaController.findByNome);
-router.get("/proprietario/:idProprietario", fazendaController.findByIdProprietario);
-router.put("/:id", fazendaController.update);
-router.delete("/:id", fazendaController.delete);
+router.post("/", authMiddleware, fazendaController.create);
+router.get("/", authMiddleware, fazendaController.findAll);
+router.get("/id/:id", authMiddleware, fazendaController.findById);
+router.get("/nome/:nome", authMiddleware, fazendaController.findByNome);
+router.get("/proprietario/:idProprietario", authMiddleware, fazendaController.findByIdProprietario);
+router.put("/:id", authMiddleware, fazendaController.update);
+router.delete("/:id", authMiddleware, fazendaController.delete);
 
 export default router;
