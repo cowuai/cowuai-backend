@@ -4,7 +4,7 @@ import {injectable} from "tsyringe";
 
 @injectable()
 export class UsuarioService {
-    async create(data: Omit<Usuario, "id">) {
+    create = async (data: Omit<Usuario, "id">) => {
         const existingCpf = await usuarioRepository.findByCpf(data.cpf)
         if (existingCpf) {
             throw new Error("Usuario com esse CPF já existe");
@@ -22,23 +22,23 @@ export class UsuarioService {
     }
 
     // READ
-    async findAll() {
-        usuarioRepository.findAll()
+    findAll = async () => {
+        return usuarioRepository.findAll()
     }
 
-    async findById(id: bigint) {
+    findById = async (id: bigint) => {
         return usuarioRepository.findById(id);
     }
 
-    async findByNome(nome: string) {
+    findByNome = async (nome: string) => {
         return usuarioRepository.findByNome(nome);
     }
 
-    async findByCpf(cpf: string) {
+    findByCpf = async (cpf: string) => {
         return usuarioRepository.findByCpf(cpf);
     }
 
-    async findByEmail(email: string) {
+    findByEmail = async (email: string) => {
         return usuarioRepository.findByEmail(email);
     }
 }

@@ -1,8 +1,10 @@
 import {Router} from "express";
-import {fazendaController} from "./fazenda.controller";
+import {FazendaController} from "./fazenda.controller";
 import {authMiddleware} from "../../middlewares/authMiddleware";
+import {container} from "tsyringe";
 
 const router = Router();
+const fazendaController = container.resolve(FazendaController);
 
 router.post("/", authMiddleware, fazendaController.create);
 router.get("/", authMiddleware, fazendaController.findAll);

@@ -13,8 +13,7 @@ export class UsuarioController {
     ) {}
 
     // CREATE
-
-    async create(req: Request, res: Response) {
+    create = async (req: Request, res: Response) => {
         try {
             const {cpf, nome, email, senha, dataNascimento, ativo} = req.body;
             const hashedPassword = await bcrypt.hash(senha, 10);
@@ -39,7 +38,7 @@ export class UsuarioController {
     }
 
     // READ – todos
-    async findAll(_req: Request, res: Response) {
+    findAll = async (_req: Request, res: Response) => {
         try {
             const usuarios = await this.usuarioService.findAll();
             res.status(200).json(usuarios);
@@ -50,7 +49,7 @@ export class UsuarioController {
     }
 
     // READ – por id
-    async findById(req: Request, res: Response) {
+    findById = async (req: Request, res: Response) => {
         try {
             const {id} = req.params;
             const usuario = await this.usuarioService.findById(BigInt(id));
@@ -62,7 +61,7 @@ export class UsuarioController {
     }
 
     // READ – por nome
-    async findByNome(req: Request, res: Response) {
+    findByNome = async (req: Request, res: Response) => {
         try {
             const {nome} = req.params;
             const usuarios = await this.usuarioService.findByNome(nome);
@@ -74,7 +73,7 @@ export class UsuarioController {
     }
 
     // READ – por CPF
-    async findByCpf(req: Request, res: Response) {
+    findByCpf = async (req: Request, res: Response) => {
         try {
             const {cpf} = req.params;
             const usuario = await this.usuarioService.findByCpf(cpf);
@@ -86,7 +85,7 @@ export class UsuarioController {
     }
 
     // READ – por Email
-    async findByEmail(req: Request, res: Response) {
+    findByEmail = async (req: Request, res: Response) => {
         try {
             const {email} = req.params;
             const usuario = await this.usuarioService.findByEmail(email);

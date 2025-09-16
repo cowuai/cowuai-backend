@@ -2,15 +2,17 @@ import 'reflect-metadata';
 import express from 'express';
 import fazendaRoutes from "./modules/fazenda/fazenda.routes";
 import authRoutes from "./modules/auth/auth.routes";
-import { errorHandler } from './middlewares/errorHandler';
-import { prisma } from './config/prisma';
+import {errorHandler} from './middlewares/errorHandler';
+import {prisma} from './config/prisma';
 import usuarioRoutes from "./modules/usuario/usuario.routes";
 
-const app = express();
+// Importa as configurações do container de injeção de dependências
+import "./shared/container";
 
+const app = express();
 app.use(express.json());
 
-// Verifica se a conexão com o banco de dados está ok
+// Verifica conexão
 app.get("/", async (req, res) => {
     try {
         await prisma.$connect();

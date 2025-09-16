@@ -19,9 +19,9 @@ export const fazendaRepository = {
         return prisma.fazenda.findMany({where: {idProprietario}});
     },
     update: (id: bigint, data: Partial<Fazenda>) => {
-        prisma.fazenda.update({where: {id}, data})
+        return prisma.fazenda.update({where: {id}, data})
     },
     delete: (id: bigint) => {
-        prisma.fazenda.delete({where: {id}})
+        return prisma.fazenda.delete({where: {id}})
     }
 }

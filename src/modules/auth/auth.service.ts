@@ -1,13 +1,15 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import {jwtConfig} from "../../config/jwt";
-import {usuarioService} from "../usuario/usuario.service";
-import {injectable} from "tsyringe";
+import {UsuarioService} from "../usuario/usuario.service";
+import {inject, injectable} from "tsyringe";
 
 @injectable()
 export class AuthService {
+    constructor(@inject(UsuarioService) private usuarioService: UsuarioService) {}
+
     async login(email: string, password: string) {
-        const user = await usuarioService.findByEmail(email);
+        const user = await this.usuarioService.findByEmail(email);
 
         if (!user) {
             throw new Error("Usuário não encontrado");
