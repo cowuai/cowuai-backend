@@ -1,26 +1,30 @@
 {
   "devDependencies": {
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.3.1",
     "nodemon": "^3.1.10",
-    "prisma": "^6.15.0",
+    "prisma": "^6.16.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@prisma/client": "^6.15.0",
+    "@prisma/client": "^6.16.2",
     "@types/bcrypt": "^6.0.0",
     "bcrypt": "^6.0.0",
     "express": "^5.1.0",
-    "save": "^2.9.0"
+    "jsonwebtoken": "^9.0.2",
+    "reflect-metadata": "^0.2.2",
+    "save": "^2.9.0",
+    "tsyringe": "^4.10.0"
   },
   "name": "cowuai-backend",
   "version": "1.0.0",
   "description": "Repositório criado para o backend do projeto CowUai desenvolvido para as disciplinas de LabESOF (Laboratório de Engenharia de Software) e DAW2 (Desenvolvimento de Aplicações Web 2) do Instituto Federal do Triângulo Mineiro.",
-  "main": "index.js",
+  "main": "src/server.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server.js",
+    "start": "node src/server.ts",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "typecheck": "tsc --noEmit"
   },
