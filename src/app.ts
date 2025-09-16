@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import express from 'express';
 import fazendaRoutes from "./modules/fazenda/fazenda.routes";
 import authRoutes from "./modules/auth/auth.routes";
@@ -9,17 +10,11 @@ const app = express();
 
 app.use(express.json());
 
-app.set(
-    "json replacer",
-    (_key: string, value: unknown) =>
-        typeof value === "bigint" ? value.toString() : value
-);
-
 // Verifica se a conexão com o banco de dados está ok
 app.get("/", async (req, res) => {
     try {
         await prisma.$connect();
-        res.send("CowUai Backend funcionando 🚀 e banco de dados conectado! ✅");
+        res.send("CowUai Backend funcionando e banco de dados conectado! ✅");
     } catch (error) {
         res
             .status(500)
@@ -27,7 +22,7 @@ app.get("/", async (req, res) => {
     }
 });
 
-app.use("auth", authRoutes);
+app.use("/auth", authRoutes);
 app.use("/usuarios", usuarioRoutes);
 app.use("/fazendas", fazendaRoutes);
 

@@ -1,11 +1,13 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import {jwtConfig} from "../../config/jwt";
-import {prisma} from "../../config/prisma";
+import {usuarioService} from "../usuario/usuario.service";
+import {injectable} from "tsyringe";
 
+@injectable()
 export class AuthService {
     async login(email: string, password: string) {
-        const user = await prisma.usuario.findUnique({where: {email}});
+        const user = await usuarioService.findByEmail(email);
 
         if (!user) {
             throw new Error("Usuário não encontrado");
