@@ -26,6 +26,42 @@ export const usuarioService = {
   findByCpf: (cpf: string) => usuarioRepository.findByCpf(cpf),
   findByEmail: (email: string) => usuarioRepository.findByEmail(email),
   
+
+  update: async (id: bigint, data: any) => {
+    // (opcional) checar unicidade se cpf/email vierem no update
+    if (typeof data.cpf === "string") {
+      const exist = await usuarioRepository.findByCpf(data.cpf);
+      if (exist && exist.id !== id) {
+        throw new Error("Usuario com esse CPF já existe");
+      }
+    }
+    if (typeof data.email === "string") {
+      const exist = await usuarioRepository.findByEmail(data.email);
+      if (exist && exist.id !== id) {
+        throw new Error("Usuario com esse E-mail já existe");
+      }
+    }
+
+    // montar payload no formato do Prisma
+    const payload: Prisma.UsuarioUpdateInput = {};
+    if (typeof data.cpf !== "undefined") payload.cpf = data.cpf;
+    if (typeof data.nome !== "undefined") payload.nome = data.nome;
+    if (typeof data.email !== "undefined") payload.email = data.email;
+    if (typeof data.senha !== "undefined") payload.senha = data.senha; // já vem hasheada do controller
+    if (typeof data.ativo !== "undefined") payload.ativo = data.ativo;
+
+    if (typeof data.dataNascimento !== "undefined") {
+      payload.dataNascimento = data.dataNascimento
+        ? new Date(data.dataNascimento)
+        : null;
+    }
+
+    return usuarioRepository.update(id, payload);
+  },
+
+  delete: async (id: bigint) => {
+    await usuarioRepository.delete(id);
+  },
 }
 
 // Valida data de nascimento (não pode ser no futuro)
@@ -40,6 +76,7 @@ function validaDataDeNascimento(data: string | Date | null | undefined): boolean
   hoje.setHours(0, 0, 0, 0);
   return d <= hoje;
 }
+
 
 
 

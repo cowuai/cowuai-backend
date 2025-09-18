@@ -4,6 +4,7 @@ import { usuarioService } from "./usuario.service";
 import bcrypt from "bcrypt"; 
 
 
+
 export const usuarioController = {
 
     create: async (req: Request, res: Response) => {
@@ -78,6 +79,45 @@ export const usuarioController = {
       const { email } = req.params;
       const usuario = await usuarioService.findByEmail(email);
       res.status(200).json(usuario);
+    } catch (error) {
+      errorHandler(error as Error, req, res, () => {});
+    }
+
+  },
+     // UPDATE (parcial) – hash da senha se enviada, converte dataNascimento
+  update: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const { cpf, nome, email, senha, dataNascimento, ativo } = req.body;
+
+      const payload: any = {};
+      if (typeof cpf !== "undefined") payload.cpf = cpf;
+      if (typeof nome !== "undefined") payload.nome = nome;
+      if (typeof email !== "undefined") payload.email = email;
+      if (typeof ativo !== "undefined") payload.ativo = ativo;
+
+      if (typeof dataNascimento !== "undefined") {
+        payload.dataNascimento = dataNascimento ? new Date(dataNascimento) : null;
+      }
+
+      if (typeof senha === "string" && senha.trim() !== "") {
+        payload.senha = await bcrypt.hash(senha, 10);
+      }
+
+      const atualizado = await usuarioService.update(BigInt(id), payload);
+      res.status(200).json(atualizado);
+    } catch (error) {
+      errorHandler(error as Error, req, res, () => {});
+    }
+  },
+
+  // DELETE
+  delete: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      await usuarioService.delete(BigInt(id));
+      res.status(204).send();
     } catch (error) {
       errorHandler(error as Error, req, res, () => {});
     }
