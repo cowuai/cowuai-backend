@@ -15,14 +15,15 @@ datasource db {
 }
 
 model Usuario {
-  id             BigInt    @id @default(autoincrement())
-  cpf            String    @unique @db.VarChar(14)
-  nome           String    @db.VarChar(255)
-  email          String    @unique @db.VarChar(255)
-  senha          String    @db.VarChar(255)
-  dataNascimento DateTime? @map("data_nascimento") @db.Date
-  ativo          Boolean   @default(true)
+  id             BigInt         @id @default(autoincrement())
+  cpf            String         @unique @db.VarChar(14)
+  nome           String         @db.VarChar(255)
+  email          String         @unique @db.VarChar(255)
+  senha          String         @db.VarChar(255)
+  dataNascimento DateTime?      @map("data_nascimento") @db.Date
+  ativo          Boolean        @default(true)
   Fazenda        Fazenda[]
+  RefreshToken   RefreshToken[]
 
   @@map("usuario") // nome da tabela = usuario
 }
@@ -48,4 +49,18 @@ enum Porte {
   PEQUENO
   MEDIO   @map("MÉDIO")
   GRANDE
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  idUsuario   BigInt
+  token       String   @unique
+  dispositivo String   @db.VarChar(255)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [idUsuario], references: [id])
+
+  @@unique([idUsuario, dispositivo])
 }
