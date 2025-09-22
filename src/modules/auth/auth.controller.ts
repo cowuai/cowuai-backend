@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 import {AuthService} from "./auth.service";
 import {inject, injectable} from "tsyringe";
+import {debug} from "node:util";
 
 @injectable()
 export class AuthController {
@@ -8,9 +9,55 @@ export class AuthController {
 
     login = async (req: Request, res: Response) => {
         try {
-            const { email, senha } = req.body;
-            const result = await this.authService.login(email, senha);
-            return res.status(200).json(result);
+            const { email, senha, dispositivo } = req.body;
+            const { accessToken, refreshToken, user, expiresIn } = await this.authService.login(email, senha, dispositivo);
+
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // só true em produção (https)
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 dias
+            })
+
+            return res.status(200).json({ accessToken, user, expiresIn });
+        } catch (err: any) {
+            console.error("Erro ao logar:", err);
+            return res.status(400).json({ error: err.message });
+        }
+    }
+
+    refresh = async (req: Request, res: Response) => {
+        try {
+            const { refreshToken: bodyToken } = req.body;
+            const refreshToken = req.cookies.refreshToken || bodyToken;
+            debug("refreshToken", refreshToken);
+
+            if (!refreshToken) return res.status(401).json({ error: "Refresh token ausente" });
+
+            const { accessToken, expiresIn } = await this.authService.refresh(refreshToken);
+            return res.json({ accessToken, expiresIn });
+        } catch (err: any) {
+            return res.status(401).json({ error: err.message });
+        }
+    };
+
+    logout = async (req: Request, res: Response) => {
+        try {
+            const { idUsuario } = req.body;
+
+            // limpo o refresh token no servidor (BD)
+            await this.authService.logout(idUsuario);
+
+            // apago o cookie no cliente (navegador)
+            res.clearCookie("refreshToken", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+            });
+
+            return res.status(204).send();
         } catch (err: any) {
             return res.status(400).json({ error: err.message });
         }
