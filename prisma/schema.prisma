@@ -64,3 +64,33 @@ model RefreshToken {
 
   @@unique([idUsuario, dispositivo])
 }
+
+enum TipoRaca {
+  NELORE
+  GIR
+  GIROLANDO
+  BRAHMAN
+  GUZERATE    @map("GUREZÁ")
+  SINDI
+  ANGUS
+  BRANGUS
+  LIMOUSIN
+  CHIANINA
+  DEVON
+  BELGIANBLUE @map("BELGIAN BLUE")
+  HEREFORD
+  CANCHIM
+  TABAPUA     @map("TABAPUÃ")
+  CARACU
+  SENEPOL
+  CHAROLAISE  @map("CHAROLÊS")
+  INDUBRASIL
+  WAGYU
+  SIMMENTAL
+  CRIOULO
+  JERSEY
+  HOLANDES    @map("HOLANDÊS")
+  MURRAH
+  MESTICO     @map("MESTIÇO")
+  OUTROS
+}
