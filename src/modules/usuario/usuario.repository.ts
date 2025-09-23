@@ -1,5 +1,5 @@
 import {prisma} from "../../config/prisma";
-import {Usuario} from "@prisma/client";
+import {Prisma, Usuario} from "@prisma/client";
 
 export const usuarioRepository = {
     create: (data: Omit<Usuario, "id">) => {
@@ -18,4 +18,10 @@ export const usuarioRepository = {
 
     findByNome: (nome: string) =>
         prisma.usuario.findMany({where: {nome}}),
+
+     update: (id: bigint, data: Prisma.UsuarioUpdateInput) =>
+    prisma.usuario.update({ where: { id }, data }),
+
+  delete: (id: bigint) =>
+    prisma.usuario.delete({ where: { id } }),
 }
