@@ -1,11 +1,12 @@
 import {Router} from "express";
 import {container} from "tsyringe";
 import {TipoRacaController} from "./tipoRaca.controller";
+import {authMiddleware} from "../../middlewares/authMiddleware";
 
 const router = Router();
 const tipoRacaController = container.resolve(TipoRacaController);
 
-router.get("/", (req, res) => {
+router.get("/", authMiddleware, (req, res) => {
     try {
         const tiposRaca = tipoRacaController.findAll();
         res.json(tiposRaca);
