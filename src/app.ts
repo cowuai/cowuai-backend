@@ -6,9 +6,8 @@ import {errorHandler} from './middlewares/errorHandler';
 import {prisma} from './config/prisma';
 import usuarioRoutes from "./modules/usuario/usuario.routes";
 import cors from "cors";
-
-// Importa as configurações do container de injeção de dependências
-import "./shared/container";
+import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
+import "./shared/container"; // Importa as configurações do container de injeção de dependências
 
 const app = express();
 app.use(express.json());
@@ -32,6 +31,7 @@ app.get("/", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/fazendas", fazendaRoutes);
+app.use("/api/tipos-raca", tipoRacaRoutes);
 
 app.use(errorHandler);
 
