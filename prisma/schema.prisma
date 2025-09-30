@@ -76,6 +76,8 @@ model Animal {
   // Relação com Fazenda
   fazenda                   Fazenda     @relation(fields: [idFazenda], references: [id])
   idFazenda                 BigInt      @db.BigInt
+  
+  idProprietario BigInt?
 
   @@map("animal")
 }
