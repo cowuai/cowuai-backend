@@ -5,10 +5,13 @@ import { injectable } from "tsyringe";
 @injectable()
 export class AnimalService {
     create = async (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
-        //evitar dois animais com mesmo "numeroParticularProprietario" para o mesmo proprietário
+        // Verifica se os campos obrigatórios para busca existem
+        const numeroParticular = data.numeroParticularProprietario ?? "";
+        const idProprietario = data.idProprietario ?? 0n;
+
         const existingAnimal = await animalRepository.findByNumeroParticularAndProprietario(
-            data.numeroParticularProprietario,
-            data.idProprietario
+           numeroParticular,
+           idProprietario
         );
 
         if (existingAnimal) {
@@ -46,7 +49,7 @@ export class AnimalService {
         return animals;
     }
 
-    update = async (id: bigint, data: Partial<Animal>) => {
+     update = async (id: bigint, data: Partial<Animal>) => {
         const existingAnimal = await animalRepository.findById(id);
         if (!existingAnimal) {
             throw new Error("Animal não encontrado");
@@ -54,7 +57,8 @@ export class AnimalService {
 
         if (
             data.numeroParticularProprietario &&
-            data.numeroParticularProprietario !== existingAnimal.numeroParticularProprietario
+            data.numeroParticularProprietario !== existingAnimal.numeroParticularProprietario &&
+            existingAnimal.idProprietario // garante que não é null
         ) {
             const duplicateAnimal = await animalRepository.findByNumeroParticularAndProprietario(
                 data.numeroParticularProprietario,

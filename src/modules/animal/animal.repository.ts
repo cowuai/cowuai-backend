@@ -14,7 +14,8 @@ export const animalRepository = {
         return prisma.animal.findUnique({ where: { id } });
     },
 
-    findByProprietario: (idProprietario: bigint): Promise<Animal[]> => {
+    findByProprietario: (idProprietario: bigint | null): Promise<Animal[]> => {
+        if (idProprietario === null) return Promise.resolve([]);
         return prisma.animal.findMany({ where: { idProprietario } });
     },
 
@@ -23,9 +24,10 @@ export const animalRepository = {
     },
 
     findByNumeroParticularAndProprietario: (
-        numeroParticularProprietario: string,
-        idProprietario: bigint
+        numeroParticularProprietario: string | null,
+        idProprietario: bigint | null
     ): Promise<Animal | null> => {
+        if (!numeroParticularProprietario || !idProprietario) return Promise.resolve(null);
         return prisma.animal.findFirst({
             where: { numeroParticularProprietario, idProprietario }
         });
