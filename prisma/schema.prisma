@@ -14,6 +14,10 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+// ==========================
+// Models
+// ==========================
+
 model Usuario {
   id             BigInt         @id @default(autoincrement())
   cpf            String         @unique @db.VarChar(14)
@@ -43,13 +47,40 @@ model Fazenda {
   sufixo          Boolean  @db.UnsignedTinyInt
   dataCadastro    DateTime @default(now()) @map("data_cadastro")
   dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
+
+  animais         Animal[]
+
+  @@map("fazenda")
 }
 
-enum Porte {
-  PEQUENO
-  MEDIO   @map("MÉDIO")
-  GRANDE
+model Animal {
+  id                        BigInt      @id @default(autoincrement()) @db.BigInt
+  nome                      String      @db.VarChar(255)
+  tipoRaca                  TipoRaca
+  composicaoRacial          String?     @db.VarChar(255)
+  dataNascimento            DateTime?   @db.Date
+  numeroParticularProprietario String?   @db.VarChar(255)
+  registro                  String?     @db.VarChar(255)
+  status                    String?     @db.VarChar(255)
+  peso                      Float?
+
+  // Relações com pais (outro Animal)
+  pai                       Animal?     @relation("PaiRelation", fields: [idPai], references: [id])
+  idPai                     BigInt?     @map("id_pai") @db.BigInt
+  filhosComoPai             Animal[]    @relation("PaiRelation")
+
+  mae                       Animal?     @relation("MaeRelation", fields: [idMae], references: [id])
+  idMae                     BigInt?     @map("id_mae") @db.BigInt
+  filhosComoMae             Animal[]    @relation("MaeRelation")
+
+  // Relação com Fazenda
+  fazenda                   Fazenda     @relation(fields: [idFazenda], references: [id])
+  idFazenda                 BigInt      @db.BigInt
+
+  @@map("animal")
 }
+
+
 
 model RefreshToken {
   id          String   @id @default(uuid())
@@ -63,6 +94,16 @@ model RefreshToken {
   usuario Usuario @relation(fields: [idUsuario], references: [id])
 
   @@unique([idUsuario, dispositivo])
+}
+
+// ==========================
+// Enums
+// ==========================
+
+enum Porte {
+  PEQUENO
+  MEDIO   @map("MÉDIO")
+  GRANDE
 }
 
 enum TipoRaca {
