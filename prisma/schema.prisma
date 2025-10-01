@@ -48,41 +48,40 @@ model Fazenda {
   dataCadastro    DateTime @default(now()) @map("data_cadastro")
   dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
 
-  animais         Animal[]
+  animais Animal[]
 
   @@map("fazenda")
 }
 
 model Animal {
-  id                        BigInt      @id @default(autoincrement()) @db.BigInt
-  nome                      String      @db.VarChar(255)
-  tipoRaca                  TipoRaca
-  composicaoRacial          String?     @db.VarChar(255)
-  dataNascimento            DateTime?   @db.Date
-  numeroParticularProprietario String?   @db.VarChar(255)
-  registro                  String?     @db.VarChar(255)
-  status                    String?     @db.VarChar(255)
-  peso                      Float?
+  id                           BigInt       @id @default(autoincrement()) @db.BigInt
+  nome                         String       @db.VarChar(255)
+  tipoRaca                     TipoRaca
+  sexo                         SexoAnimal
+  composicaoRacial             String?      @db.VarChar(255)
+  dataNascimento               DateTime?    @db.Date
+  numeroParticularProprietario String?      @db.VarChar(255)
+  registro                     String?      @db.VarChar(255)
+  status                       StatusAnimal @default(VIVO)
+  peso                         Float?
 
   // Relações com pais (outro Animal)
-  pai                       Animal?     @relation("PaiRelation", fields: [idPai], references: [id])
-  idPai                     BigInt?     @map("id_pai") @db.BigInt
-  filhosComoPai             Animal[]    @relation("PaiRelation")
+  pai           Animal?  @relation("PaiRelation", fields: [idPai], references: [id])
+  idPai         BigInt?  @map("id_pai") @db.BigInt
+  filhosComoPai Animal[] @relation("PaiRelation")
 
-  mae                       Animal?     @relation("MaeRelation", fields: [idMae], references: [id])
-  idMae                     BigInt?     @map("id_mae") @db.BigInt
-  filhosComoMae             Animal[]    @relation("MaeRelation")
+  mae           Animal?  @relation("MaeRelation", fields: [idMae], references: [id])
+  idMae         BigInt?  @map("id_mae") @db.BigInt
+  filhosComoMae Animal[] @relation("MaeRelation")
 
   // Relação com Fazenda
-  fazenda                   Fazenda     @relation(fields: [idFazenda], references: [id])
-  idFazenda                 BigInt      @db.BigInt
-  
+  fazenda   Fazenda @relation(fields: [idFazenda], references: [id])
+  idFazenda BigInt  @db.BigInt
+
   idProprietario BigInt?
 
   @@map("animal")
 }
-
-
 
 model RefreshToken {
   id          String   @id @default(uuid())
@@ -136,4 +135,17 @@ enum TipoRaca {
   MURRAH
   MESTICO     @map("MESTIÇO")
   OUTROS
+}
+
+enum SexoAnimal {
+  MACHO
+  FEMEA
+}
+
+enum StatusAnimal {
+  VIVO
+  FALECIDO
+  VENDIDO
+  DOADO
+  ROUBADO
 }

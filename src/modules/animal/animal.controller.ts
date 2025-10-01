@@ -12,6 +12,7 @@ export class AnimalController {
             const {
                 nome,
                 tipoRaca,
+                sexo,
                 composicaoRacial,
                 dataNascimento,
                 numeroParticularProprietario,
@@ -27,11 +28,12 @@ export class AnimalController {
             const newAnimal = await this.animalService.create({
                 nome,
                 tipoRaca,
+                sexo: sexo ?? null,
                 composicaoRacial: composicaoRacial ?? null,
-                dataNascimento: dataNascimento ?? null,
+                dataNascimento: new Date(dataNascimento) ?? null,
                 numeroParticularProprietario: numeroParticularProprietario ?? null,
                 registro: registro ?? null,
-                status: status ?? null,
+                status: status,
                 peso: peso ?? null,
                 idPai: idPai ?? null,
                 idMae: idMae ?? null,
