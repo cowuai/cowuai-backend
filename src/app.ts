@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import express from 'express';
 import fazendaRoutes from "./modules/fazenda/fazenda.routes";
+import animalRoutes from "./modules/animal/animal.routes";
 import authRoutes from "./modules/auth/auth.routes";
 import {errorHandler} from './middlewares/errorHandler';
 import {prisma} from './config/prisma';
@@ -31,6 +32,7 @@ app.get("/", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/fazendas", fazendaRoutes);
+app.use("/api/animais", animalRoutes);
 app.use("/api/tipos-raca", tipoRacaRoutes);
 
 app.use(errorHandler);
