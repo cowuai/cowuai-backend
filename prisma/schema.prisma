@@ -106,7 +106,7 @@ model TipoVacina {
   generoAlvo      SexoAnimal?
   minIdadeMeses   Int?             @map("min_idade_meses") @db.Int
   maxIdadeMeses   Int?             @map("max_idade_meses") @db.Int
-  frequencia      String?          @db.VarChar(255) // Ex: anual, semestral, dose única, etc.
+  frequencia      FrequenciaVacina
   dataCadastro    DateTime         @default(now()) @map("data_cadastro")
   dataAtualizacao DateTime         @updatedAt @map("data_atualizacao")
   aplicacoes      VacinaAplicada[]
@@ -184,4 +184,12 @@ enum StatusAnimal {
   VENDIDO
   DOADO
   ROUBADO
+}
+
+enum FrequenciaVacina {
+  ANUAL
+  SEMESTRAL
+  TRIMESTRAL
+  MENSAL
+  UNICA
 }

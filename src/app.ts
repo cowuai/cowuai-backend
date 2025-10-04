@@ -6,6 +6,7 @@ import authRoutes from "./modules/auth/auth.routes";
 import usuarioRoutes from "./modules/usuario/usuario.routes";
 import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
 import tipoVacinaRoutes from "./modules/vacina/tipoVacina.routes";
+import aplicacaoVacinaRoutes from "./modules/vacina/aplicacaoVacina.routes";
 import {errorHandler} from './middlewares/errorHandler';
 import {prisma} from './config/prisma';
 import cors from "cors";
@@ -36,6 +37,7 @@ app.use("/api/fazendas", fazendaRoutes);
 app.use("/api/animais", animalRoutes);
 app.use("/api/tipos-raca", tipoRacaRoutes);
 app.use("/api/tipos-vacina", tipoVacinaRoutes);
+app.use("/api/aplicacoes-vacina", aplicacaoVacinaRoutes);
 
 app.use(errorHandler);
 
