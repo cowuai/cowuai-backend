@@ -75,10 +75,11 @@ model Animal {
   filhosComoMae Animal[] @relation("MaeRelation")
 
   // Relação com Fazenda
-  fazenda   Fazenda @relation(fields: [idFazenda], references: [id])
-  idFazenda BigInt  @db.BigInt
-
+  fazenda        Fazenda @relation(fields: [idFazenda], references: [id])
+  idFazenda      BigInt  @db.BigInt
   idProprietario BigInt?
+
+  vacinacoes VacinaAplicada[]
 
   @@map("animal")
 }
@@ -95,6 +96,40 @@ model RefreshToken {
   usuario Usuario @relation(fields: [idUsuario], references: [id])
 
   @@unique([idUsuario, dispositivo])
+}
+
+model TipoVacina {
+  id              BigInt           @id @default(autoincrement()) @db.BigInt
+  nome            String           @db.VarChar(255)
+  descricao       String?          @db.VarChar(255)
+  obrigatoria     Boolean          @db.UnsignedTinyInt
+  generoAlvo      SexoAnimal?
+  minIdadeMeses   Int?             @map("min_idade_meses") @db.Int
+  maxIdadeMeses   Int?             @map("max_idade_meses") @db.Int
+  frequencia      FrequenciaVacina
+  dataCadastro    DateTime         @default(now()) @map("data_cadastro")
+  dataAtualizacao DateTime         @updatedAt @map("data_atualizacao")
+  aplicacoes      VacinaAplicada[]
+
+  @@map("tipo_vacina")
+}
+
+model VacinaAplicada {
+  id              BigInt     @id @default(autoincrement()) @db.BigInt
+  animal          Animal     @relation(fields: [idAnimal], references: [id])
+  idAnimal        BigInt     @map("id_animal") @db.BigInt
+  tipoVacina      TipoVacina @relation(fields: [idTipoVacina], references: [id])
+  idTipoVacina    BigInt     @map("id_tipo_vacina") @db.BigInt
+  dataAplicacao   DateTime   @map("data_aplicacao") @db.Date
+  proximaDose     DateTime?  @map("proxima_dose") @db.Date
+  numeroDose      Int?       @map("numero_dose") @db.Int
+  lote            String?    @db.VarChar(255)
+  veterinario     String?    @db.VarChar(255)
+  observacoes     String?    @db.VarChar(255)
+  dataCadastro    DateTime   @default(now()) @map("data_cadastro")
+  dataAtualizacao DateTime   @updatedAt @map("data_atualizacao")
+
+  @@map("vacina_aplicada")
 }
 
 // ==========================
@@ -140,6 +175,7 @@ enum TipoRaca {
 enum SexoAnimal {
   MACHO
   FEMEA
+  INDETERMINADO
 }
 
 enum StatusAnimal {
@@ -148,4 +184,12 @@ enum StatusAnimal {
   VENDIDO
   DOADO
   ROUBADO
+}
+
+enum FrequenciaVacina {
+  ANUAL
+  SEMESTRAL
+  TRIMESTRAL
+  MENSAL
+  UNICA
 }
