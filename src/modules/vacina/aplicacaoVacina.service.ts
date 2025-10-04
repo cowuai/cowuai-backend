@@ -36,7 +36,7 @@ export class AplicacaoVacinaService {
             throw new Error(`Vacina ${tipoVacina.nome} requer idade máxima de ${tipoVacina.maxIdadeMeses} meses`);
         }
 
-        if (tipoVacina.frequencia == FrequenciaVacina.ANUAL) {
+        if (tipoVacina.frequencia === FrequenciaVacina.ANUAL) {
             const lastApplication = await aplicacaoVacinaRepository.findByIdAnimal(animal.id)
                 .then(apps => apps
                     .filter(app => app.idTipoVacina === tipoVacina.id)
