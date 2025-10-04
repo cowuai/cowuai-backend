@@ -9,6 +9,8 @@ import {TipoRacaService} from "../modules/tipoRaca/tipoRaca.service";
 import {TipoRacaController} from "../modules/tipoRaca/tipoRaca.controller";
 import {AnimalController} from "../modules/animal/animal.controller";
 import {AnimalService} from "../modules/animal/animal.service";
+import {TipoVacinaService} from "../modules/vacina/tipoVacina.service";
+import {TipoVacinaController} from "../modules/vacina/tipoVacina.controller";
 
 // Auth
 container.registerSingleton(AuthService, AuthService);
@@ -29,3 +31,11 @@ container.registerSingleton(TipoRacaController, TipoRacaController);
 // Animal
 container.registerSingleton(AnimalService, AnimalService);
 container.registerSingleton(AnimalController, AnimalController);
+
+// TipoVacina
+container.registerSingleton(TipoVacinaService, TipoVacinaService);
+container.registerSingleton(TipoVacinaController, TipoVacinaController);
+
+// Vacina
+// container.registerSingleton(VacinaService, VacinaService);
+// container.registerSingleton(VacinaController, VacinaController);

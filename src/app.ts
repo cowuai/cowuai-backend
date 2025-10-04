@@ -3,11 +3,12 @@ import express from 'express';
 import fazendaRoutes from "./modules/fazenda/fazenda.routes";
 import animalRoutes from "./modules/animal/animal.routes";
 import authRoutes from "./modules/auth/auth.routes";
+import usuarioRoutes from "./modules/usuario/usuario.routes";
+import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
+import tipoVacinaRoutes from "./modules/vacina/tipoVacina.routes";
 import {errorHandler} from './middlewares/errorHandler';
 import {prisma} from './config/prisma';
-import usuarioRoutes from "./modules/usuario/usuario.routes";
 import cors from "cors";
-import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
 import "./shared/container"; // Importa as configurações do container de injeção de dependências
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/fazendas", fazendaRoutes);
 app.use("/api/animais", animalRoutes);
 app.use("/api/tipos-raca", tipoRacaRoutes);
+app.use("/api/tipos-vacina", tipoVacinaRoutes);
 
 app.use(errorHandler);
 
