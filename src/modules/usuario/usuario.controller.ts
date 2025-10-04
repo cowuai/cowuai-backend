@@ -30,6 +30,8 @@ export class UsuarioController {
 
             const loggedUserWithToken = await this.authService.login(email, senha);
 
+            
+
             res.status(201).json(loggedUserWithToken);
         } catch (error) {
             console.error("Erro ao criar usuário:", error);

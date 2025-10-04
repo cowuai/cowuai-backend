@@ -3,7 +3,9 @@ import {Prisma, Usuario} from "@prisma/client";
 
 export const usuarioRepository = {
     create: (data: Omit<Usuario, "id">) => {
-        return prisma.usuario.create({data});
+        // Remove o campo 'fazenda' se existir
+        const { fazenda, ...usuarioData } = data as any;
+        return prisma.usuario.create({ data: usuarioData });
     },
     findByCpf: (cpf: string) => {
         return prisma.usuario.findUnique({where: {cpf}});
