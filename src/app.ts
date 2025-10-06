@@ -7,18 +7,13 @@ import tipoVacinaRoutes from "./modules/vacina/tipoVacina.routes";
 import aplicacaoVacinaRoutes from "./modules/vacina/aplicacaoVacina.routes";
 import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
 import usuarioRoutes from "./modules/usuario/usuario.routes";
-import cadastroRoutes from "./routes/cadastro.route";
+import cadastroRoutes from "./modules/cadastro/cadastro.route";
 import {errorHandler} from "./middlewares/errorHandler";
 import {prisma} from "./config/prisma";
 import cors from "cors";
 import "./shared/container"; // Importa as configurações do container de injeção de dependências
 
 const app = express();
-
-app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3001",
-    credentials: true,
-}));
 
 app.use(express.json());
 app.use(cors({

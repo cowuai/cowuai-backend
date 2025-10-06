@@ -26,16 +26,15 @@ model Usuario {
   senha          String         @db.VarChar(255)
   dataNascimento DateTime?      @map("data_nascimento") @db.Date
   ativo          Boolean        @default(true)
-  Fazenda        Fazenda[]
-  RefreshToken   RefreshToken[]
+  fazenda        Fazenda[]
+  refreshToken   RefreshToken[]
 
-  @@map("usuario") // nome da tabela = usuario
+  @@map("usuario")
 }
 
 model Fazenda {
   id              BigInt   @id @default(autoincrement()) @db.BigInt
-  proprietario    Usuario  @relation(fields: [idProprietario], references: [id])
-  idProprietario  BigInt   @unique @map("id_proprietario") @db.BigInt
+  idProprietario  BigInt   @map("id_proprietario") @db.BigInt
   nome            String   @db.VarChar(255)
   endereco        String   @db.VarChar(255)
   cidade          String   @db.VarChar(255)
@@ -47,8 +46,8 @@ model Fazenda {
   sufixo          Boolean  @db.UnsignedTinyInt
   dataCadastro    DateTime @default(now()) @map("data_cadastro")
   dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
-
-  animais Animal[]
+  animais         Animal[]
+  proprietario    Usuario? @relation(fields: [idProprietario], references: [id])
 
   @@map("fazenda")
 }
