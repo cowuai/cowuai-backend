@@ -3,9 +3,7 @@ import {Prisma, Usuario} from "@prisma/client";
 
 export const usuarioRepository = {
     create: (data: Omit<Usuario, "id">) => {
-        // Remove o campo 'fazenda' se existir
-        const { fazenda, ...usuarioData } = data as any;
-        return prisma.usuario.create({ data: usuarioData });
+        return prisma.usuario.create({data: data});
     },
     findByCpf: (cpf: string) => {
         return prisma.usuario.findUnique({where: {cpf}});
@@ -21,9 +19,9 @@ export const usuarioRepository = {
     findByNome: (nome: string) =>
         prisma.usuario.findMany({where: {nome}}),
 
-     update: (id: bigint, data: Prisma.UsuarioUpdateInput) =>
-    prisma.usuario.update({ where: { id }, data }),
+    update: (id: bigint, data: Prisma.UsuarioUpdateInput) =>
+        prisma.usuario.update({where: {id}, data}),
 
-  delete: (id: bigint) =>
-    prisma.usuario.delete({ where: { id } }),
+    delete: (id: bigint) =>
+        prisma.usuario.delete({where: {id}}),
 }
