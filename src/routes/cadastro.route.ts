@@ -4,6 +4,7 @@ import { container } from "tsyringe";
 import { UsuarioService } from "../modules/usuario/usuario.service";
 import { FazendaService } from "../modules/fazenda/fazenda.service";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt"; // Importe o bcrypt aqui
 
 const router = Router();
 const usuarioService = container.resolve(UsuarioService);
@@ -11,11 +12,17 @@ const fazendaService = container.resolve(FazendaService);
 
 router.post("/", async (req, res) => {
   try {
-    // 1️⃣ Criar usuário
+    const { senha, ...restOfBody } = req.body;
+
+    // Criptografe a senha antes de criar o usuário
+    const hashedPassword = await bcrypt.hash(senha, 10);
+
+    // 1️⃣ Criar usuário com a senha criptografada
     const usuario = await usuarioService.create({
-      ...req.body,
-      dataNascimento: req.body.dataNascimento
-        ? new Date(req.body.dataNascimento)
+      ...restOfBody,
+      senha: hashedPassword, // Passe a senha já criptografada
+      dataNascimento: restOfBody.dataNascimento
+        ? new Date(restOfBody.dataNascimento)
         : null,
     });
 
@@ -23,9 +30,9 @@ router.post("/", async (req, res) => {
     const fazenda = await fazendaService.create({
       ...req.body.fazenda,
       idProprietario: usuario.id,
-      prefixo: req.body.fazenda?.prefixo === true, // booleano direto
-      sufixo: req.body.fazenda?.sufixo === true,   // booleano direto
-      porte: req.body.fazenda?.porte, // string do enum Porte
+      prefixo: req.body.fazenda?.prefixo === true,
+      sufixo: req.body.fazenda?.sufixo === true,
+      porte: req.body.fazenda?.porte,
     });
 
     // 3️⃣ Gerar token JWT
@@ -48,5 +55,4 @@ router.post("/", async (req, res) => {
       .json({ message: err.message || "Erro ao cadastrar usuário/fazenda" });
   }
 });
-
 export default router;
