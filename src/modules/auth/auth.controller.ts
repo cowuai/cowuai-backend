@@ -11,6 +11,7 @@ export class AuthController {
         try {
             const { email, senha, dispositivo } = req.body;
             const { accessToken, refreshToken, user, expiresIn } = await this.authService.login(email, senha, dispositivo);
+            console.log('Nova requisição recebida em /login');
 
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
@@ -44,10 +45,15 @@ export class AuthController {
 
     logout = async (req: Request, res: Response) => {
         try {
-            const { idUsuario } = req.body;
+            const { userId } = (req as any).user;
+            console.log('Nova requisição recebida em /logout');
+
+            if (!userId) {
+                return res.status(401).json({ error: "Usuário não autenticado." });
+            }
 
             // limpo o refresh token no servidor (BD)
-            await this.authService.logout(idUsuario);
+            await this.authService.logout(userId);
 
             // apago o cookie no cliente (navegador)
             res.clearCookie("refreshToken", {
