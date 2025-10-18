@@ -2,42 +2,65 @@ import { prisma } from "../../config/prisma";
 import { Animal } from "@prisma/client";
 
 export const animalRepository = {
-    create: (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
-        return prisma.animal.create({ data });
-    },
+  create: (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
+    return prisma.animal.create({ data });
+  }, // =========================================================
 
-    findAll: (): Promise<Animal[]> => {
-        return prisma.animal.findMany();
-    },
+  // NOVO: 1. Método para busca paginada
+  // Utiliza skip (offset) e take (limit) do Prisma
+  // =========================================================
+  findManyPaginated: (skip: number, take: number): Promise<Animal[]> => {
+    return prisma.animal.findMany({
+      skip: skip,
+      take: take,
+      orderBy: {
+        // Sugestão de ordenação para resultados consistentes
+        id: "desc",
+      },
+      // Você pode adicionar um where {} para filtros se necessário
+    });
+  },
 
-    findById: (id: bigint): Promise<Animal | null> => {
-        return prisma.animal.findUnique({ where: { id } });
-    },
+  // =========================================================
+  // NOVO: 2. Método para contagem total de registros
+  // Essencial para calcular o total de páginas no Controller
+  // =========================================================
+  countAll: (): Promise<number> => {
+    return prisma.animal.count();
+  },
 
-    findByProprietario: (idProprietario: bigint | null): Promise<Animal[]> => {
-        if (idProprietario === null) return Promise.resolve([]);
-        return prisma.animal.findMany({ where: { idProprietario } });
-    },
+  // O método findAll original foi substituído pela lógica de paginação
+  // removendo a duplicação desnecessária.
 
-    findByFazenda: (idFazenda: bigint): Promise<Animal[]> => {
-        return prisma.animal.findMany({ where: { idFazenda } });
-    },
+  findById: (id: bigint): Promise<Animal | null> => {
+    return prisma.animal.findUnique({ where: { id } });
+  },
 
-    findByNumeroParticularAndProprietario: (
-        numeroParticularProprietario: string | null,
-        idProprietario: bigint | null
-    ): Promise<Animal | null> => {
-        if (!numeroParticularProprietario || !idProprietario) return Promise.resolve(null);
-        return prisma.animal.findFirst({
-            where: { numeroParticularProprietario, idProprietario }
-        });
-    },
+  findByProprietario: (idProprietario: bigint | null): Promise<Animal[]> => {
+    if (idProprietario === null) return Promise.resolve([]);
+    return prisma.animal.findMany({ where: { idProprietario } });
+  },
 
-    update: (id: bigint, data: Partial<Animal>) => {
-        return prisma.animal.update({ where: { id }, data });
-    },
+  findByFazenda: (idFazenda: bigint): Promise<Animal[]> => {
+    return prisma.animal.findMany({ where: { idFazenda } });
+  },
 
-    delete: (id: bigint) => {
-        return prisma.animal.delete({ where: { id } });
-    }
+  findByNumeroParticularAndProprietario: (
+    numeroParticularProprietario: string | null,
+    idProprietario: bigint | null
+  ): Promise<Animal | null> => {
+    if (!numeroParticularProprietario || !idProprietario)
+      return Promise.resolve(null);
+    return prisma.animal.findFirst({
+      where: { numeroParticularProprietario, idProprietario },
+    });
+  },
+
+  update: (id: bigint, data: Partial<Animal>) => {
+    return prisma.animal.update({ where: { id }, data });
+  },
+
+  delete: (id: bigint) => {
+    return prisma.animal.delete({ where: { id } });
+  },
 };

@@ -2,82 +2,106 @@ import { animalRepository } from "./animal.repository";
 import { Animal } from "@prisma/client";
 import { injectable } from "tsyringe";
 
+// =========================================================
+// NOVO: Interface para o resultado paginado
+// =========================================================
+interface PaginatedAnimalsResult {
+    animals: Animal[];
+    total: number;
+}
+
 @injectable()
 export class AnimalService {
-    create = async (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
-        // Verifica se os campos obrigatórios para busca existem
-        const numeroParticular = data.numeroParticularProprietario ?? "";
-        const idProprietario = data.idProprietario ?? 0n;
+    create = async (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
+        // Verifica se os campos obrigatórios para busca existem
+        const numeroParticular = data.numeroParticularProprietario ?? "";
+        const idProprietario = data.idProprietario ?? 0n;
 
-        const existingAnimal = await animalRepository.findByNumeroParticularAndProprietario(
-           numeroParticular,
-           idProprietario
-        );
+        const existingAnimal = await animalRepository.findByNumeroParticularAndProprietario(
+           numeroParticular,
+           idProprietario
+        );
 
-        if (existingAnimal) {
-            throw new Error("Já existe um animal com esse número particular para este proprietário");
-        }
+        if (existingAnimal) {
+            throw new Error("Já existe um animal com esse número particular para este proprietário");
+        }
 
-        return animalRepository.create(data);
+        return animalRepository.create(data);
+    }
+
+    // =========================================================
+    // MODIFICADO/NOVO: Implementação da Paginação
+    // O antigo findAll foi substituído por findAllPaginated
+    // =========================================================
+    findAllPaginated = async (page: number, pageSize: number): Promise<PaginatedAnimalsResult> => {
+        const skip = (page - 1) * pageSize;
+
+        // Assumimos que o repository terá os métodos findManyPaginated e countAll
+        const animalsPromise = animalRepository.findManyPaginated(skip, pageSize);
+        const totalPromise = animalRepository.countAll();
+        
+        // Executa as duas consultas em paralelo para otimizar a performance
+        const [animals, total] = await Promise.all([animalsPromise, totalPromise]);
+
+        return { animals, total };
     }
+    
+    // O método findAll original foi removido ou substituído pelo findAllPaginated
+    // Caso ainda precise de um findAll sem paginação, ele deve chamar animalRepository.findAll()
 
-    findAll = () => {
-        return animalRepository.findAll();
-    }
+    findById = async (id: bigint) => {
+        const animal = await animalRepository.findById(id);
+        if (!animal) {
+            throw new Error("Animal não encontrado");
+        }
+        return animal;
+    }
 
-    findById = async (id: bigint) => {
-        const animal = await animalRepository.findById(id);
-        if (!animal) {
-            throw new Error("Animal não encontrado");
-        }
-        return animal;
-    }
+    findByProprietario = async (idProprietario: bigint) => {
+        const animals = await animalRepository.findByProprietario(idProprietario);
+        if (!animals || animals.length === 0) {
+            throw new Error("Nenhum animal encontrado para este proprietário");
+        }
+        return animals;
+    }
 
-    findByProprietario = async (idProprietario: bigint) => {
-        const animals = await animalRepository.findByProprietario(idProprietario);
-        if (!animals || animals.length === 0) {
-            throw new Error("Nenhum animal encontrado para este proprietário");
-        }
-        return animals;
-    }
+    findByFazenda = async (idFazenda: bigint) => {
+        const animals = await animalRepository.findByFazenda(idFazenda);
+        if (!animals || animals.length === 0) {
+            throw new Error("Nenhum animal encontrado para esta fazenda");
+        }
+        return animals;
+    }
 
-    findByFazenda = async (idFazenda: bigint) => {
-        const animals = await animalRepository.findByFazenda(idFazenda);
-        if (!animals || animals.length === 0) {
-            throw new Error("Nenhum animal encontrado para esta fazenda");
-        }
-        return animals;
-    }
+     update = async (id: bigint, data: Partial<Animal>) => {
+        const existingAnimal = await animalRepository.findById(id);
+        if (!existingAnimal) {
+            throw new Error("Animal não encontrado");
+        }
 
-     update = async (id: bigint, data: Partial<Animal>) => {
-        const existingAnimal = await animalRepository.findById(id);
-        if (!existingAnimal) {
-            throw new Error("Animal não encontrado");
-        }
+        if (
+            data.numeroParticularProprietario &&
+            data.numeroParticularProprietario !== existingAnimal.numeroParticularProprietario &&
+            existingAnimal.idProprietario // garante que não é null
+        ) {
+            const duplicateAnimal = await animalRepository.findByNumeroParticularAndProprietario(
+                data.numeroParticularProprietario,
+                existingAnimal.idProprietario
+            );
 
-        if (
-            data.numeroParticularProprietario &&
-            data.numeroParticularProprietario !== existingAnimal.numeroParticularProprietario &&
-            existingAnimal.idProprietario // garante que não é null
-        ) {
-            const duplicateAnimal = await animalRepository.findByNumeroParticularAndProprietario(
-                data.numeroParticularProprietario,
-                existingAnimal.idProprietario
-            );
+            if (duplicateAnimal) {
+                throw new Error("Outro animal com esse número particular já existe para este proprietário");
+            }
+        }
 
-            if (duplicateAnimal) {
-                throw new Error("Outro animal com esse número particular já existe para este proprietário");
-            }
-        }
+        return animalRepository.update(id, data);
+    }
 
-        return animalRepository.update(id, data);
-    }
-
-    delete = async (id: bigint) => {
-        const existingAnimal = await animalRepository.findById(id);
-        if (!existingAnimal) {
-            throw new Error("Animal não encontrado");
-        }
-        return animalRepository.delete(id);
-    }
+    delete = async (id: bigint) => {
+        const existingAnimal = await animalRepository.findById(id);
+        if (!existingAnimal) {
+            throw new Error("Animal não encontrado");
+        }
+        return animalRepository.delete(id);
+    }
 }
