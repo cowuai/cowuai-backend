@@ -32,7 +32,7 @@ export class AuthController {
         try {
             const { refreshToken: bodyToken } = req.body;
             const refreshToken = req.cookies.refreshToken || bodyToken;
-            debug("refreshToken", refreshToken);
+            console.log("Refresh Token:", refreshToken);
 
             if (!refreshToken) return res.status(401).json({ error: "Refresh token ausente" });
 

@@ -99,7 +99,7 @@ model RefreshToken {
 
 model TipoVacina {
   id              BigInt           @id @default(autoincrement()) @db.BigInt
-  nome            String           @db.VarChar(255)
+  nome            String           @unique @db.VarChar(255)
   descricao       String?          @db.VarChar(255)
   obrigatoria     Boolean          @db.UnsignedTinyInt
   generoAlvo      SexoAnimal?
@@ -174,7 +174,7 @@ enum TipoRaca {
 enum SexoAnimal {
   MACHO
   FEMEA
-  INDETERMINADO
+  TODOS
 }
 
 enum StatusAnimal {
@@ -188,7 +188,9 @@ enum StatusAnimal {
 enum FrequenciaVacina {
   ANUAL
   SEMESTRAL
+  BIMESTRAL
   TRIMESTRAL
   MENSAL
-  UNICA
+  DOSE_UNICA
+  REFORCO
 }

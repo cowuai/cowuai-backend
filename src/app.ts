@@ -12,16 +12,18 @@ import {errorHandler} from "./middlewares/errorHandler";
 import {prisma} from "./config/prisma";
 import cors from "cors";
 import "./shared/container"; // Importa as configurações do container de injeção de dependências
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 app.use(cors({
-  origin: [process.env.FRONTEND_URL || "http://localhost:3001"],
+  origin: [process.env.FRONTEND_URL || "http://localhost:3000"],
   credentials: true,
   methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
 }));
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Verifica conexão
 app.get("/", async (req, res) => {
