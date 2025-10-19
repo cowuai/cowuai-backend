@@ -41,6 +41,7 @@ export class TipoVacinaController {
 
     findAll = async (_req: Request, res: Response) => {
         try {
+            console.log("Requisição recebida para buscar todos os tipos de vacina");
             const tiposVacina = await this.tipoVacinaService.findAll();
             res.status(200).json(tiposVacina);
         } catch (error) {
