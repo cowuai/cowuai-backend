@@ -80,4 +80,12 @@ export class AnimalService {
         }
         return animalRepository.delete(id);
     }
+
+    async findByIdWithRelations(bigint: bigint, relation: string) {
+        const animalWithRelations = await animalRepository.findByIdWithRelations(bigint, relation);
+        if (!animalWithRelations) {
+            throw new Error("Animal não encontrado");
+        }
+        return animalWithRelations;
+    }
 }

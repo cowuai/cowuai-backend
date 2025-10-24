@@ -41,7 +41,7 @@ model Fazenda {
   estado          String   @db.VarChar(50)
   pais            String   @db.VarChar(50)
   porte           Porte
-  afixo           String   @db.VarChar(255)
+  afixo           String   @unique @db.VarChar(255)
   prefixo         Boolean  @db.UnsignedTinyInt
   sufixo          Boolean  @db.UnsignedTinyInt
   dataCadastro    DateTime @default(now()) @map("data_cadastro")
@@ -57,9 +57,9 @@ model Animal {
   nome                         String       @db.VarChar(255)
   tipoRaca                     TipoRaca
   sexo                         SexoAnimal
-  composicaoRacial             String?      @db.VarChar(255)
+  composicaoRacial             String?      @map("composicao_racial") @db.VarChar(255)
   dataNascimento               DateTime?    @db.Date
-  numeroParticularProprietario String?      @db.VarChar(255)
+  numeroParticularProprietario String?      @unique @map("numero_particular_proprietario") @db.VarChar(255)
   registro                     String?      @db.VarChar(255)
   status                       StatusAnimal @default(VIVO)
   peso                         Float?

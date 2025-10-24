@@ -1,4 +1,4 @@
-import { PrismaClient, SexoAnimal, FrequenciaVacina } from "@prisma/client";
+import {PrismaClient, SexoAnimal, FrequenciaVacina, TipoRaca, StatusAnimal} from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -113,6 +113,133 @@ async function main() {
     }
 
     console.log('Seed de tipos de vacina concluído.');
+
+    const usuarioTeste = await prisma.usuario.upsert({
+        where: { email: 'teste@email.com' },
+        update: {},
+        create: {
+            nome: 'Usuário de Teste',
+            email: 'teste@email.com',
+            senha: '$2a$12$nFxZ7y6hWAsXiE.bStThG.82hWkBarl7m5fLqzur72GFBuZ/XmEoq',
+            cpf: '12345678900',
+            dataNascimento: new Date("1990-01-01"),
+            ativo: true,
+        },
+    });
+
+    console.log('Seed de usuário de teste concluído.');
+
+    const fazendaTeste = await prisma.fazenda.upsert({
+        where: { afixo: 'FAZENDA_TESTE' },
+        update: {},
+        create: {
+            nome: 'Fazenda de Teste',
+            afixo: 'FAZENDA_TESTE',
+            idProprietario: usuarioTeste.id,
+            cidade: 'Cidade Teste',
+            estado: 'Estado Teste',
+            pais: 'País Teste',
+            porte: 'MEDIO',
+            prefixo: false,
+            sufixo: true,
+            endereco: 'Rua de Teste, 123',
+        },
+    });
+
+    console.log('Seed de fazenda de teste concluído.');
+
+    const animaisTeste = [
+        {
+            numeroParticularProprietario: 'ANIMAL001',
+            nome: 'Animal Teste 1',
+            sexo: SexoAnimal.MACHO,
+            dataNascimento: new Date('2020-01-01'),
+            tipoRaca: TipoRaca.GIR,
+            localizacao: 'Baias 3',
+            status: StatusAnimal.VIVO,
+            idProprietario: usuarioTeste.id,
+            idFazenda: fazendaTeste.id,
+            idPai: null,
+            idMae: null,
+        },
+        {
+            numeroParticularProprietario: 'ANIMAL002',
+            nome: 'Animal Teste 2',
+            sexo: SexoAnimal.FEMEA,
+            dataNascimento: new Date('2021-06-15'),
+            tipoRaca: TipoRaca.HOLANDES,
+            localizacao: 'Baias 5',
+            status: StatusAnimal.VIVO,
+            idProprietario: usuarioTeste.id,
+            idFazenda: fazendaTeste.id,
+            idPai: null,
+            idMae: null,
+        },
+        {
+            numeroParticularProprietario: 'ANIMAL003',
+            nome: 'Animal Teste 3',
+            sexo: SexoAnimal.FEMEA,
+            dataNascimento: new Date('2019-11-20'),
+            tipoRaca: TipoRaca.GIROLANDO,
+            localizacao: 'Pastagem A',
+            status: StatusAnimal.VIVO,
+            idProprietario: usuarioTeste.id,
+            idFazenda: fazendaTeste.id,
+            idPai: 1n,
+            idMae: 2n,
+        }
+    ];
+
+    for (const animal of animaisTeste) {
+        await prisma.animal.upsert({
+            where: { numeroParticularProprietario: animal.numeroParticularProprietario! },
+            update: animal,
+            create: animal,
+        });
+    }
+
+    console.log('Seed de animais de teste concluído.');
+
+    const aplicacoesVacinaTeste = [
+        {
+            idAnimal: 1n,
+            idTipoVacina: 1n,
+            dataAplicacao: new Date('2023-01-10'),
+            proximaDose: new Date('2023-07-10'),
+            numeroDose: 1,
+            lote: 'L001',
+            veterinario: 'Dr. Veterinário A',
+            observacoes: 'Nenhuma observação.',
+        },
+        {
+            idAnimal: 2n,
+            idTipoVacina: 2n,
+            dataAplicacao: new Date('2023-02-15'),
+            proximaDose: null,
+            numeroDose: 1,
+            lote: 'L002',
+            veterinario: 'Dra. Veterinária B',
+            observacoes: 'Aplicada sem complicações.',
+        },
+        {
+            idAnimal: 3n,
+            idTipoVacina: 3n,
+            dataAplicacao: new Date('2023-03-20'),
+            proximaDose: new Date('2024-03-20'),
+            numeroDose: 1,
+            lote: 'L003',
+            veterinario: 'Dr. Veterinário C',
+            observacoes: 'Reação leve no local da aplicação.',
+        }
+    ];
+
+    for (const aplicacao of aplicacoesVacinaTeste) {
+        await prisma.vacinaAplicada.create({
+            data: aplicacao,
+        });
+    }
+
+    console.log('Seed de aplicações de vacina de teste concluído.');
 }
 
 main()
