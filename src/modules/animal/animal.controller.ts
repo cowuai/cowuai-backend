@@ -38,7 +38,8 @@ export class AnimalController {
                 idPai: idPai ?? null,
                 idMae: idMae ?? null,
                 idProprietario: idProprietario ?? null,
-                idFazenda
+                idFazenda,
+                localizacao: ""
             });
 
             res.status(201).json(newAnimal);
@@ -63,6 +64,24 @@ export class AnimalController {
                 return res.status(400).json({ error: "ID inválido" });
             }
             const animal = await this.animalService.findById(BigInt(id));
+            res.status(200).json(animal);
+        } catch (error) {
+            errorHandler(error as Error, req, res, () => {});
+        }
+    }
+
+    findByIdWithRelations = async (req: Request, res: Response) => {
+        try {
+            const { id, relation } = req.params;
+            if (!id || isNaN(Number(id))) {
+                return res.status(400).json({ error: "ID inválido" });
+            }
+
+            if (!['pais', 'filhos', 'vacinacoes'].includes(relation)) {
+                return res.status(400).json({ error: "Relação inválida" });
+            }
+
+            const animal = await this.animalService.findByIdWithRelations(BigInt(id), relation);
             res.status(200).json(animal);
         } catch (error) {
             errorHandler(error as Error, req, res, () => {});

@@ -1,9 +1,9 @@
-import { prisma } from "../../config/prisma";
-import { Animal } from "@prisma/client";
+import {prisma} from "../../config/prisma";
+import {Animal} from "@prisma/client";
 
 export const animalRepository = {
     create: (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
-        return prisma.animal.create({ data });
+        return prisma.animal.create({data});
     },
 
     findAll: (): Promise<Animal[]> => {
@@ -11,16 +11,16 @@ export const animalRepository = {
     },
 
     findById: (id: bigint): Promise<Animal | null> => {
-        return prisma.animal.findUnique({ where: { id } });
+        return prisma.animal.findUnique({where: {id}});
     },
 
     findByProprietario: (idProprietario: bigint | null): Promise<Animal[]> => {
         if (idProprietario === null) return Promise.resolve([]);
-        return prisma.animal.findMany({ where: { idProprietario } });
+        return prisma.animal.findMany({where: {idProprietario}});
     },
 
     findByFazenda: (idFazenda: bigint): Promise<Animal[]> => {
-        return prisma.animal.findMany({ where: { idFazenda } });
+        return prisma.animal.findMany({where: {idFazenda}});
     },
 
     findByNumeroParticularAndProprietario: (
@@ -29,15 +29,47 @@ export const animalRepository = {
     ): Promise<Animal | null> => {
         if (!numeroParticularProprietario || !idProprietario) return Promise.resolve(null);
         return prisma.animal.findFirst({
-            where: { numeroParticularProprietario, idProprietario }
+            where: {numeroParticularProprietario, idProprietario}
         });
     },
 
     update: (id: bigint, data: Partial<Animal>) => {
-        return prisma.animal.update({ where: { id }, data });
+        return prisma.animal.update({where: {id}, data});
     },
 
     delete: (id: bigint) => {
-        return prisma.animal.delete({ where: { id } });
+        return prisma.animal.delete({where: {id}});
+    },
+
+    findByIdWithRelations(bigint: bigint, relation: string) {
+        const includeOptions: any = {};
+        if (relation === 'pais') {
+            includeOptions.pai = {
+                include: { pai: true, mae: true }
+            }
+            includeOptions.mae = {
+                include: { pai: true, mae: true }
+            }
+        } else if (relation === 'filhos') {
+            includeOptions.filhosComoMae = {
+                include: { pai: true, mae: true }
+            }
+            includeOptions.filhosComoPai = {
+                include: { pai: true, mae: true }
+            }
+        } else if (relation === 'vacinacoes') {
+            includeOptions.vacinacoes = {
+                include: {
+                    tipoVacina: true
+                }
+            }
+        } else {
+            throw new Error("Relação inválida");
+        }
+
+        return prisma.animal.findUnique({
+            where: {id: bigint},
+            include: includeOptions
+        });
     }
 };

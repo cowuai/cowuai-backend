@@ -9,6 +9,7 @@ const animalController = container.resolve(AnimalController);
 router.post("/", authMiddleware, animalController.create);
 router.get("/", authMiddleware, animalController.findAll);
 router.get("/id/:id", authMiddleware, animalController.findById);
+router.get("/relation/:id/:relation", authMiddleware, animalController.findByIdWithRelations);
 router.get("/proprietario/:idProprietario", authMiddleware, animalController.findByProprietario);
 router.get("/fazenda/:idFazenda", authMiddleware, animalController.findByFazenda);
 router.put("/:id", authMiddleware, animalController.update);
