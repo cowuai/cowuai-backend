@@ -46,8 +46,8 @@ export class AnimalController {
         } catch (error) {
             errorHandler(error as Error, req, res, () => {});
         }
-    }
-  };
+    };
+  
 
   findAll = async (req: Request, res: Response) => {
     try {
@@ -103,26 +103,7 @@ export class AnimalController {
     }
   };
 
-  findByIdWithRelations = async (req: Request, res: Response) => {
-    try {
-      const { id, relation } = req.params;
-      if (!id || isNaN(Number(id))) {
-        return res.status(400).json({ error: "ID inválido" });
-      }
 
-      if (!["pais", "filhos", "vacinacoes"].includes(relation)) {
-        return res.status(400).json({ error: "Relação inválida" });
-      }
-
-      const animal = await this.animalService.findByIdWithRelations(
-        BigInt(id),
-        relation
-      );
-      res.status(200).json(animal);
-    } catch (error) {
-      errorHandler(error as Error, req, res, () => {});
-    }
-  };
 
     findByIdWithRelations = async (req: Request, res: Response) => {
         try {
@@ -140,7 +121,7 @@ export class AnimalController {
         } catch (error) {
             errorHandler(error as Error, req, res, () => {});
         }
-    }
+    };
 
     findByProprietario = async (req: Request, res: Response) => {
         try {
@@ -153,8 +134,7 @@ export class AnimalController {
         } catch (error) {
             errorHandler(error as Error, req, res, () => {});
         }
-    }
-  };
+    };
 
   findByFazenda = async (req: Request, res: Response) => {
     try {
