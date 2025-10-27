@@ -8,8 +8,8 @@ import aplicacaoVacinaRoutes from "./modules/vacina/aplicacaoVacina.routes";
 import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
 import usuarioRoutes from "./modules/usuario/usuario.routes";
 import cadastroRoutes from "./modules/cadastro/cadastro.route";
-import {errorHandler} from "./middlewares/errorHandler";
-import {prisma} from "./config/prisma";
+import { errorHandler } from "./middlewares/errorHandler";
+import { prisma } from "./config/prisma";
 import cors from "cors";
 import "./shared/container"; // Importa as configurações do container de injeção de dependências
 import cookieParser from "cookie-parser";

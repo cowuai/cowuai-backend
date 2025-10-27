@@ -2,13 +2,25 @@ import {prisma} from "../../config/prisma";
 import {Animal} from "@prisma/client";
 
 export const animalRepository = {
-    create: (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
-        return prisma.animal.create({data});
-    },
+  create: (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
+    return prisma.animal.create({ data });
+  },
 
-    findAll: (): Promise<Animal[]> => {
-        return prisma.animal.findMany();
-    },
+  findManyPaginated: (skip: number, take: number): Promise<Animal[]> => {
+    return prisma.animal.findMany({
+      skip: skip,
+      take: take,
+      orderBy: {
+        id: "desc", // Ou outra ordenação desejada
+      },
+      // where: {} // Adicione filtros aqui se necessário
+    });
+  },
+    
+  countAll: (): Promise<number> => {
+    // where: {} // Adicione os mesmos filtros do findManyPaginated se houver
+    return prisma.animal.count();
+  },
 
     findById: (id: bigint): Promise<Animal | null> => {
         return prisma.animal.findUnique({where: {id}});
@@ -72,4 +84,10 @@ export const animalRepository = {
             include: includeOptions
         });
     }
+
+    return prisma.animal.findUnique({
+      where: { id: bigint },
+      include: includeOptions,
+    });
+  },
 };
