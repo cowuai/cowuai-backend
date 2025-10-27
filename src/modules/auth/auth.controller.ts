@@ -36,8 +36,8 @@ export class AuthController {
 
             if (!refreshToken) return res.status(401).json({ error: "Refresh token ausente" });
 
-            const { accessToken, expiresIn } = await this.authService.refresh(refreshToken);
-            return res.json({ accessToken, expiresIn });
+            const { accessToken, user, expiresIn } = await this.authService.refresh(refreshToken); //inclui user
+             return res.json({ accessToken, user, expiresIn }); // <<< devolve user
         } catch (err: any) {
             return res.status(401).json({ error: err.message });
         }

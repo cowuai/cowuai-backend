@@ -60,7 +60,10 @@ export class AuthService {
     }
 
     async refresh(refreshToken: string) {
-        const stored = await prisma.refreshToken.findUnique({where: {token: refreshToken}});
+        const stored = await prisma.refreshToken.findUnique({
+            where: {token: refreshToken},
+            include: { usuario: true }, // pega o usuário junto    
+            });
         if (!stored || stored.expiresAt < new Date()) {
             throw new Error("Refresh token inválido ou expirado");
         }
@@ -71,7 +74,12 @@ export class AuthService {
             {expiresIn: jwtConfig.expiresIn}
         );
 
-        return {accessToken: newAccessToken, expiresIn: jwtConfig.expiresIn};
+        return {
+            accessToken: newAccessToken, 
+             user: stored.usuario,          // <<< retorna o usuário junto 
+            expiresIn: jwtConfig.expiresIn,
+            
+        };
     }
 
     async logout(idUsuario: string) {
