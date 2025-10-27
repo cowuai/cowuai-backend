@@ -16,27 +16,25 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: ["http://localhost:3001"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  })
-);
+app.use(cors({
+  origin: [process.env.FRONTEND_URL || "http://localhost:3000"],
+  credentials: true,
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
+}));
 
 app.use(express.json());
 app.use(cookieParser());
 
 // Verifica conexão
 app.get("/", async (req, res) => {
-  try {
-    await prisma.$connect();
-    res.send("CowUai Backend funcionando e banco de dados conectado! ✅");
-  } catch (error) {
-    res
-      .status(500)
-      .send("CowUai Backend funcionando, mas com erro no banco de dados. ❌");
-  }
+    try {
+        await prisma.$connect();
+        res.send("CowUai Backend funcionando e banco de dados conectado! ✅");
+    } catch (error) {
+        res
+            .status(500)
+            .send("CowUai Backend funcionando, mas com erro no banco de dados. ❌");
+    }
 });
 
 app.use("/api/cadastro", cadastroRoutes);

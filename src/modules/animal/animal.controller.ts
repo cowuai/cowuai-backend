@@ -5,46 +5,47 @@ import { AnimalService } from "./animal.service";
 
 @injectable()
 export class AnimalController {
-  constructor(@inject(AnimalService) private animalService: AnimalService) {}
+    constructor(@inject(AnimalService) private animalService: AnimalService) {}
 
-  create = async (req: Request, res: Response) => {
-    try {
-      const {
-        nome,
-        tipoRaca,
-        sexo,
-        composicaoRacial,
-        dataNascimento,
-        numeroParticularProprietario,
-        registro,
-        status,
-        peso,
-        idPai,
-        idMae,
-        idProprietario,
-        idFazenda,
-      } = req.body;
+    create = async (req: Request, res: Response) => {
+        try {
+            const {
+                nome,
+                tipoRaca,
+                sexo,
+                composicaoRacial,
+                dataNascimento,
+                numeroParticularProprietario,
+                registro,
+                status,
+                peso,
+                idPai,
+                idMae,
+                idProprietario,
+                idFazenda
+            } = req.body;
 
-      const newAnimal = await this.animalService.create({
-        nome,
-        tipoRaca,
-        sexo: sexo ?? null,
-        composicaoRacial: composicaoRacial ?? null,
-        dataNascimento: new Date(dataNascimento) ?? null,
-        numeroParticularProprietario: numeroParticularProprietario ?? null,
-        registro: registro ?? null,
-        status: status,
-        peso: peso ?? null,
-        idPai: idPai ?? null,
-        idMae: idMae ?? null,
-        idProprietario: idProprietario ?? null,
-        idFazenda,
-        localizacao: "",
-      });
+            const newAnimal = await this.animalService.create({
+                nome,
+                tipoRaca,
+                sexo: sexo ?? null,
+                composicaoRacial: composicaoRacial ?? null,
+                dataNascimento: new Date(dataNascimento) ?? null,
+                numeroParticularProprietario: numeroParticularProprietario ?? null,
+                registro: registro ?? null,
+                status: status,
+                peso: peso ?? null,
+                idPai: idPai ?? null,
+                idMae: idMae ?? null,
+                idProprietario: idProprietario ?? null,
+                idFazenda,
+                localizacao: ""
+            });
 
-      res.status(201).json(newAnimal);
-    } catch (error) {
-      errorHandler(error as Error, req, res, () => {});
+            res.status(201).json(newAnimal);
+        } catch (error) {
+            errorHandler(error as Error, req, res, () => {});
+        }
     }
   };
 
@@ -123,18 +124,35 @@ export class AnimalController {
     }
   };
 
-  findByProprietario = async (req: Request, res: Response) => {
-    try {
-      const { idProprietario } = req.params;
-      if (!idProprietario || isNaN(Number(idProprietario))) {
-        return res.status(400).json({ error: "ID de proprietário inválido" });
-      }
-      const animals = await this.animalService.findByProprietario(
-        BigInt(idProprietario)
-      );
-      res.status(200).json(animals);
-    } catch (error) {
-      errorHandler(error as Error, req, res, () => {});
+    findByIdWithRelations = async (req: Request, res: Response) => {
+        try {
+            const { id, relation } = req.params;
+            if (!id || isNaN(Number(id))) {
+                return res.status(400).json({ error: "ID inválido" });
+            }
+
+            if (!['pais', 'filhos', 'vacinacoes'].includes(relation)) {
+                return res.status(400).json({ error: "Relação inválida" });
+            }
+
+            const animal = await this.animalService.findByIdWithRelations(BigInt(id), relation);
+            res.status(200).json(animal);
+        } catch (error) {
+            errorHandler(error as Error, req, res, () => {});
+        }
+    }
+
+    findByProprietario = async (req: Request, res: Response) => {
+        try {
+            const { idProprietario } = req.params;
+            if (!idProprietario || isNaN(Number(idProprietario))) {
+                return res.status(400).json({ error: "ID de proprietário inválido" });
+            }
+            const animals = await this.animalService.findByProprietario(BigInt(idProprietario));
+            res.status(200).json(animals);
+        } catch (error) {
+            errorHandler(error as Error, req, res, () => {});
+        }
     }
   };
 
