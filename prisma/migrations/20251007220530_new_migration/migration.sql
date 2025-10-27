@@ -29,7 +29,6 @@ CREATE TABLE `fazenda` (
     `data_cadastro` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `data_atualizacao` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `fazenda_id_proprietario_key`(`id_proprietario`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -38,7 +37,7 @@ CREATE TABLE `animal` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `nome` VARCHAR(255) NOT NULL,
     `tipoRaca` ENUM('NELORE', 'GIR', 'GIROLANDO', 'BRAHMAN', 'GUREZÁ', 'SINDI', 'ANGUS', 'BRANGUS', 'LIMOUSIN', 'CHIANINA', 'DEVON', 'BELGIAN BLUE', 'HEREFORD', 'CANCHIM', 'TABAPUÃ', 'CARACU', 'SENEPOL', 'CHAROLÊS', 'INDUBRASIL', 'WAGYU', 'SIMMENTAL', 'CRIOULO', 'JERSEY', 'HOLANDÊS', 'MURRAH', 'MESTIÇO', 'OUTROS') NOT NULL,
-    `sexo` ENUM('MACHO', 'FEMEA') NOT NULL,
+    `sexo` ENUM('MACHO', 'FEMEA', 'INDETERMINADO') NOT NULL,
     `composicaoRacial` VARCHAR(255) NULL,
     `dataNascimento` DATE NULL,
     `numeroParticularProprietario` VARCHAR(255) NULL,
@@ -68,6 +67,39 @@ CREATE TABLE `RefreshToken` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `tipo_vacina` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `nome` VARCHAR(255) NOT NULL,
+    `descricao` VARCHAR(255) NULL,
+    `obrigatoria` TINYINT UNSIGNED NOT NULL,
+    `generoAlvo` ENUM('MACHO', 'FEMEA', 'INDETERMINADO') NULL,
+    `min_idade_meses` INTEGER NULL,
+    `max_idade_meses` INTEGER NULL,
+    `frequencia` ENUM('ANUAL', 'SEMESTRAL', 'TRIMESTRAL', 'MENSAL', 'UNICA') NOT NULL,
+    `data_cadastro` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `data_atualizacao` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `vacina_aplicada` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id_animal` BIGINT NOT NULL,
+    `id_tipo_vacina` BIGINT NOT NULL,
+    `data_aplicacao` DATE NOT NULL,
+    `proxima_dose` DATE NULL,
+    `numero_dose` INTEGER NULL,
+    `lote` VARCHAR(255) NULL,
+    `veterinario` VARCHAR(255) NULL,
+    `observacoes` VARCHAR(255) NULL,
+    `data_cadastro` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `data_atualizacao` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `fazenda` ADD CONSTRAINT `fazenda_id_proprietario_fkey` FOREIGN KEY (`id_proprietario`) REFERENCES `usuario`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -82,3 +114,9 @@ ALTER TABLE `animal` ADD CONSTRAINT `animal_idFazenda_fkey` FOREIGN KEY (`idFaze
 
 -- AddForeignKey
 ALTER TABLE `RefreshToken` ADD CONSTRAINT `RefreshToken_idUsuario_fkey` FOREIGN KEY (`idUsuario`) REFERENCES `usuario`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `vacina_aplicada` ADD CONSTRAINT `vacina_aplicada_id_animal_fkey` FOREIGN KEY (`id_animal`) REFERENCES `animal`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `vacina_aplicada` ADD CONSTRAINT `vacina_aplicada_id_tipo_vacina_fkey` FOREIGN KEY (`id_tipo_vacina`) REFERENCES `tipo_vacina`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

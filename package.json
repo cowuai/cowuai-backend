@@ -1,19 +1,25 @@
 {
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.3.1",
+    "concurrently": "^9.2.1",
     "nodemon": "^3.1.10",
     "prisma": "^6.16.2",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2",
-    "@types/bcrypt": "^6.0.0"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "reflect-metadata": "^0.2.2",
@@ -25,10 +31,13 @@
   "description": "Repositório criado para o backend do projeto CowUai desenvolvido para as disciplinas de LabESOF (Laboratório de Engenharia de Software) e DAW2 (Desenvolvimento de Aplicações Web 2) do Instituto Federal do Triângulo Mineiro.",
   "main": "src/server.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node src/server.ts",
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
-    "typecheck": "tsc --noEmit"
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "start": "node dist/server.js",
+    "dev": "npm run build && concurrently \"tsc -w\" \"nodemon dist/server.js\""
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
-import {fazendaRepository} from "./fazenda.repository";
-import {Fazenda} from "@prisma/client";
-import {injectable} from "tsyringe";
+import { fazendaRepository } from "./fazenda.repository";
+import { Fazenda } from "@prisma/client";
+import { injectable } from "tsyringe";
 
 @injectable()
 export class FazendaService {
@@ -13,7 +13,7 @@ export class FazendaService {
     }
 
     findAll = () => {
-        return fazendaRepository.findAll;
+        return fazendaRepository.findAll();
     }
 
     findById = async (id: bigint) => {

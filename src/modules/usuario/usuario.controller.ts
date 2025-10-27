@@ -30,8 +30,6 @@ export class UsuarioController {
 
             const loggedUserWithToken = await this.authService.login(email, senha);
 
-            
-
             res.status(201).json(loggedUserWithToken);
         } catch (error) {
             console.error("Erro ao criar usuário:", error);
@@ -98,29 +96,35 @@ export class UsuarioController {
         }
     }
 
-      update = async (req: Request, res: Response) => {
-    try {
-      const id = BigInt(req.params.id);
-      const { cpf, nome, email, senha, dataNascimento, ativo } = req.body;
-      const payload: any = {};
-      if (cpf !== undefined) payload.cpf = cpf;
-      if (nome !== undefined) payload.nome = nome;
-      if (email !== undefined) payload.email = email;
-      if (ativo !== undefined) payload.ativo = ativo;
-      if (dataNascimento !== undefined) payload.dataNascimento = dataNascimento ? new Date(dataNascimento) : null;
-      if (typeof senha === "string" && senha.trim()) {
-        payload.senha = await bcrypt.hash(senha, 10);
-      }
-      const atualizado = await this.usuarioService.update(id, payload);
-      res.status(200).json(atualizado);
-    } catch (error) { errorHandler(error as Error, req, res, () => {}); }
-  }
+    update = async (req: Request, res: Response) => {
+        try {
+            const id = BigInt(req.params.id);
+            const {cpf, nome, email, senha, dataNascimento, ativo} = req.body;
+            const payload: any = {};
+            if (cpf !== undefined) payload.cpf = cpf;
+            if (nome !== undefined) payload.nome = nome;
+            if (email !== undefined) payload.email = email;
+            if (ativo !== undefined) payload.ativo = ativo;
+            if (dataNascimento !== undefined) payload.dataNascimento = dataNascimento ? new Date(dataNascimento) : null;
+            if (typeof senha === "string" && senha.trim()) {
+                payload.senha = await bcrypt.hash(senha, 10);
+            }
+            const atualizado = await this.usuarioService.update(id, payload);
+            res.status(200).json(atualizado);
+        } catch (error) {
+            errorHandler(error as Error, req, res, () => {
+            });
+        }
+    }
 
-  delete = async (req: Request, res: Response) => {
-    try {
-      await this.usuarioService.delete(BigInt(req.params.id));
-      res.status(204).send();
-    } catch (error) { errorHandler(error as Error, req, res, () => {}); }
-  }
+    delete = async (req: Request, res: Response) => {
+        try {
+            await this.usuarioService.delete(BigInt(req.params.id));
+            res.status(204).send();
+        } catch (error) {
+            errorHandler(error as Error, req, res, () => {
+            });
+        }
+    }
 
 }
