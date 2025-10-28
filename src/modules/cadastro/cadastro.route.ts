@@ -13,7 +13,7 @@ const authService = container.resolve(AuthService);
 
 router.post("/", async (req, res) => {
     try {
-        const {cpf, nome, email, senha, dataNascimento, fazenda} = req.body;
+        const {cpf, nome, email, senha, dataNascimento, telefone, localizacao, urlImagem, fazenda} = req.body;
 
         if (!cpf || !nome || !email || !senha || !fazenda) {
             return res.status(400).json({message: "Campos obrigatórios faltando"});
@@ -28,6 +28,11 @@ router.post("/", async (req, res) => {
             senha: hashedPassword,
             dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
             ativo: true,
+            telefone: telefone || "",
+            localizacao: localizacao || "",
+            urlImagem: urlImagem || "",
+            resetPasswordToken: null,
+            resetPasswordExpires: null
         });
 
         await fazendaService.create({

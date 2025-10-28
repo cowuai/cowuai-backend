@@ -83,6 +83,14 @@ export const animalRepository = {
             where: {id: bigint},
             include: includeOptions
         });
+    },
+
+    countAnimalsByUserId: async (userId: bigint) => {
+        return prisma.animal.count({
+            where: {
+                idProprietario: userId
+            }
+        });
     }
 
   };

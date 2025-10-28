@@ -15,7 +15,17 @@ export class UsuarioController {
     // CREATE
     create = async (req: Request, res: Response) => {
         try {
-            const {cpf, nome, email, senha, dataNascimento, ativo} = req.body;
+            const {
+                cpf,
+                nome,
+                email,
+                senha,
+                dataNascimento,
+                ativo,
+                localizacao,
+                urlImagem,
+                telefone
+            } = req.body;
             const hashedPassword = await bcrypt.hash(senha, 10);
 
             await this.usuarioService.create({
@@ -25,6 +35,11 @@ export class UsuarioController {
                     senha: hashedPassword,
                     dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
                     ativo: ativo ?? true,
+                    telefone: telefone ?? "",
+                    localizacao: localizacao ?? "",
+                    urlImagem: urlImagem ?? "",
+                    resetPasswordToken: null,
+                    resetPasswordExpires: null
                 },
             );
 
@@ -99,7 +114,9 @@ export class UsuarioController {
     update = async (req: Request, res: Response) => {
         try {
             const id = BigInt(req.params.id);
-            const {cpf, nome, email, senha, dataNascimento, ativo} = req.body;
+
+            const {cpf, nome, email, senha, dataNascimento, ativo, telefone, localizacao, urlImagem} = req.body;
+
             const payload: any = {};
             if (cpf !== undefined) payload.cpf = cpf;
             if (nome !== undefined) payload.nome = nome;
@@ -109,6 +126,10 @@ export class UsuarioController {
             if (typeof senha === "string" && senha.trim()) {
                 payload.senha = await bcrypt.hash(senha, 10);
             }
+            if (telefone !== undefined) payload.telefone = telefone;
+            if (localizacao !== undefined) payload.localizacao = localizacao;
+            if (urlImagem !== undefined) payload.urlImagem = urlImagem;
+
             const atualizado = await this.usuarioService.update(id, payload);
             res.status(200).json(atualizado);
         } catch (error) {

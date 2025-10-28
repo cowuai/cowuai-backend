@@ -9,24 +9,19 @@ interface PaginatedAnimalsResult {
 
 @injectable()
 export class AnimalService {
-  create = async (
-    data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">
-  ) => {
-    // Verifica se os campos obrigatórios para busca existem
-    const numeroParticular = data.numeroParticularProprietario ?? "";
-    const idProprietario = data.idProprietario ?? 0n;
+    create = async (data: Omit<Animal, "id" | "dataCadastro" | "dataAtualizacao">) => {
+        // Verifica se os campos obrigatórios para busca existem
+        const numeroParticular = data.numeroParticularProprietario ?? "";
+        const idProprietario = data.idProprietario ?? 0n;
 
-    const existingAnimal =
-      await animalRepository.findByNumeroParticularAndProprietario(
-        numeroParticular,
-        idProprietario
-      );
+        const existingAnimal = await animalRepository.findByNumeroParticularAndProprietario(
+           numeroParticular,
+           idProprietario
+        );
 
-    if (existingAnimal) {
-      throw new Error(
-        "Já existe um animal com esse número particular para este proprietário"
-      );
-    }
+        if (existingAnimal) {
+            throw new Error("Já existe um animal com esse número particular para este proprietário");
+        }
 
     return animalRepository.create(data);
   };
@@ -107,14 +102,15 @@ export class AnimalService {
     return animalRepository.delete(id);
   };
 
-  async findByIdWithRelations(bigint: bigint, relation: string) {
-    const animalWithRelations = await animalRepository.findByIdWithRelations(
-      bigint,
-      relation
-    );
-    if (!animalWithRelations) {
-      throw new Error("Animal não encontrado");
+    async findByIdWithRelations(bigint: bigint, relation: string) {
+        const animalWithRelations = await animalRepository.findByIdWithRelations(bigint, relation);
+        if (!animalWithRelations) {
+            throw new Error("Animal não encontrado");
+        }
+        return animalWithRelations;
     }
-    return animalWithRelations;
-  }
+
+    countAnimalsByUserId = async (userId: bigint) => {
+        return animalRepository.countAnimalsByUserId(userId);
+    }
 }

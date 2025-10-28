@@ -4,7 +4,7 @@ import {injectable} from "tsyringe";
 
 @injectable()
 export class UsuarioService {
-    create = async (data: Omit<Usuario, "id">) => {
+    create = async (data: Omit<Usuario, "id" | "dataCadastro" | "dataAtualizacao">) => {
         const existingCpf = await usuarioRepository.findByCpf(data.cpf)
         if (existingCpf) {
             throw new Error("Usuario com esse CPF já existe");
