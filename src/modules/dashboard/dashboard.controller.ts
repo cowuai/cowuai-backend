@@ -3,6 +3,8 @@ import {prisma} from "../../config/prisma";
 
 export const getDashboardData = async (req: Request, res: Response) => {
     try {
+        const {userId} = (req as any).user;
+
         // ------------------ VACINAÇÕES POR MÊS ------------------
         const vacinacoes = await prisma.vacinaAplicada.findMany({
             select: {dataAplicacao: true},
@@ -76,7 +78,17 @@ export const getDashboardData = async (req: Request, res: Response) => {
             where: {registro: {not: null}},
         });
 
+        // ------------------ TOTAL DE ANIMAIS VENDIDOS -------------------
+        const totalAnimaisVendidos = await prisma.animal.count({
+            where: {status: "VENDIDO"},
+        });
 
+        // ------------------ TOTAL DE FAZENDAS DO CRIADOR -------------------
+        const totalFazendasDoCriador = await prisma.fazenda.count({
+            where: {idProprietario: BigInt(userId)},
+        });
+
+        // ------------------ MONTAGEM DO RESULTADO FINAL ------------------
         const taxaReproducao = totalAnimais > 0
             ? Math.round((animaisReprodutivos / totalAnimais) * 100)
             : 0;
@@ -89,7 +101,9 @@ export const getDashboardData = async (req: Request, res: Response) => {
             animaisDoentes,
             taxaReproducao,
             totalAnimais,
-            totalAnimaisComRegistro
+            totalAnimaisComRegistro,
+            totalFazendasDoCriador,
+            totalAnimaisVendidos
         });
     } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
