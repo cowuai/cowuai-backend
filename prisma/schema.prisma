@@ -34,7 +34,7 @@ model Usuario {
   fazenda              Fazenda[]
   refreshToken         RefreshToken[]
   dataCadastro         DateTime       @default(now()) @map("data_cadastro")
-  dataAtualizacao      DateTime       @updatedAt @map("data_atualizacao")
+  dataAtualizacao      DateTime       @default(now()) @updatedAt @map("data_atualizacao")
 
   @@map("usuario")
 }
