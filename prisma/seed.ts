@@ -122,6 +122,8 @@ async function main() {
             email: 'teste@email.com',
             senha: '$2a$12$nFxZ7y6hWAsXiE.bStThG.82hWkBarl7m5fLqzur72GFBuZ/XmEoq',
             cpf: '12345678900',
+            telefone: '11999999999',
+            localizacao: 'Cidade de Teste, Estado de Teste',
             dataNascimento: new Date("1990-01-01"),
             ativo: true,
         },

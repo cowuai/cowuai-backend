@@ -19,15 +19,22 @@ datasource db {
 // ==========================
 
 model Usuario {
-  id             BigInt         @id @default(autoincrement())
-  cpf            String         @unique @db.VarChar(14)
-  nome           String         @db.VarChar(255)
-  email          String         @unique @db.VarChar(255)
-  senha          String         @db.VarChar(255)
-  dataNascimento DateTime?      @map("data_nascimento") @db.Date
-  ativo          Boolean        @default(true)
-  fazenda        Fazenda[]
-  refreshToken   RefreshToken[]
+  id                   BigInt         @id @default(autoincrement())
+  cpf                  String         @unique @db.VarChar(14)
+  nome                 String         @db.VarChar(255)
+  email                String         @unique @db.VarChar(255)
+  senha                String         @db.VarChar(255)
+  dataNascimento       DateTime?      @map("data_nascimento") @db.Date
+  ativo                Boolean        @default(true)
+  telefone             String?        @db.VarChar(20)
+  localizacao          String?        @db.VarChar(255)
+  urlImagem            String?        @db.VarChar(255)
+  resetPasswordToken   String?        @map("reset_password_token") @db.VarChar(255)
+  resetPasswordExpires DateTime?      @map("reset_password_expires")
+  fazenda              Fazenda[]
+  refreshToken         RefreshToken[]
+  dataCadastro         DateTime       @default(now()) @map("data_cadastro")
+  dataAtualizacao      DateTime       @updatedAt @map("data_atualizacao")
 
   @@map("usuario")
 }

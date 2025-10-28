@@ -88,4 +88,8 @@ export class AnimalService {
         }
         return animalWithRelations;
     }
+
+    countAnimalsByUserId = async (userId: bigint) => {
+        return animalRepository.countAnimalsByUserId(userId);
+    }
 }

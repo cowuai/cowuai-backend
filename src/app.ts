@@ -8,6 +8,7 @@ import aplicacaoVacinaRoutes from "./modules/vacina/aplicacaoVacina.routes";
 import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
 import usuarioRoutes from "./modules/usuario/usuario.routes";
 import cadastroRoutes from "./modules/cadastro/cadastro.route";
+import perfilRoutes from "./modules/perfil/perfil.route";
 import {errorHandler} from "./middlewares/errorHandler";
 import {prisma} from "./config/prisma";
 import cors from "cors";
@@ -39,6 +40,7 @@ app.get("/", async (req, res) => {
 
 app.use("/api/cadastro", cadastroRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/perfil", perfilRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/fazendas", fazendaRoutes);
 app.use("/api/animais", animalRoutes);

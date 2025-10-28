@@ -2,7 +2,7 @@ import {prisma} from "../../config/prisma";
 import {Prisma, Usuario} from "@prisma/client";
 
 export const usuarioRepository = {
-    create: (data: Omit<Usuario, "id">) => {
+    create: (data: Omit<Usuario, "id" | "dataCadastro" | "dataAtualizacao">) => {
         return prisma.usuario.create({data: data});
     },
     findByCpf: (cpf: string) => {

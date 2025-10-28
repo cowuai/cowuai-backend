@@ -1,5 +1,5 @@
 import {FazendaService} from "./fazenda.service";
-import { Request, Response, NextFunction } from "express";
+import {Request, Response, NextFunction} from "express";
 import {errorHandler} from "../../middlewares/errorHandler";
 import {inject, injectable} from "tsyringe";
 
@@ -9,63 +9,63 @@ export class FazendaController {
     }
 
     create = async (req: Request, res: Response) => {
-  try {
-    // 1) pega o userId do JWT (setado no authMiddleware)
-    const user = (req as any).user;
-    const userId = user?.userId;
-    if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
-    }
+        try {
+            // 1) pega o userId do JWT (setado no authMiddleware)
+            const user = (req as any).user;
+            const userId = user?.userId;
+            if (!userId) {
+                return res.status(401).json({error: "Usuário não autenticado"});
+            }
 
-    // 2) pega os campos do body
-    let {
-      nome,
-      endereco,
-      cidade,
-      estado,
-      pais,
-      porte,
-      afixo,
-      prefixo,
-      sufixo,
-    } = req.body;
+            // 2) pega os campos do body
+            let {
+                nome,
+                endereco,
+                cidade,
+                estado,
+                pais,
+                porte,
+                afixo,
+                prefixo,
+                sufixo,
+            } = req.body;
 
-    // 3) validação dos obrigatórios (conforme schema atual)
-    const faltando: string[] = [];
-    if (!nome) faltando.push("nome");
-    if (!endereco) faltando.push("endereco");
-    if (!cidade) faltando.push("cidade");
-    if (!estado) faltando.push("estado");
-    if (!pais) faltando.push("pais");
-    if (porte === undefined || porte === null) faltando.push("porte");
-    if (afixo === undefined || afixo === null) faltando.push("afixo");
-    if (prefixo === undefined || prefixo === null) faltando.push("prefixo");
-    if (sufixo === undefined || sufixo === null) faltando.push("sufixo");
+            // 3) validação dos obrigatórios (conforme schema atual)
+            const faltando: string[] = [];
+            if (!nome) faltando.push("nome");
+            if (!endereco) faltando.push("endereco");
+            if (!cidade) faltando.push("cidade");
+            if (!estado) faltando.push("estado");
+            if (!pais) faltando.push("pais");
+            if (porte === undefined || porte === null) faltando.push("porte");
+            if (afixo === undefined || afixo === null) faltando.push("afixo");
+            if (prefixo === undefined || prefixo === null) faltando.push("prefixo");
+            if (sufixo === undefined || sufixo === null) faltando.push("sufixo");
 
-    if (faltando.length) {
-      return res.status(400).json({ error: `Campos obrigatórios: ${faltando.join(", ")}` });
-    }
+            if (faltando.length) {
+                return res.status(400).json({error: `Campos obrigatórios: ${faltando.join(", ")}`});
+            }
 
-    // 4) chama o service passando idProprietario a partir do token
-    const newFazenda = await this.fazendaService.create({
-      idProprietario: BigInt(userId), // ⚠️ seu schema usa BigInt
-      nome,
-      endereco,
-      cidade,
-      estado,
-      pais,
-      porte,    // valores aceitos: "PEQUENO" | "MEDIO" | "GRANDE"
-      afixo,    // string
-      prefixo,  // boolean
-      sufixo,   // boolean
-      // os campos de dataCadastro/dataAtualizacao são gerados pelo Prisma
-    } as any);
+            // 4) chama o service passando idProprietario a partir do token
+            const newFazenda = await this.fazendaService.create({
+                idProprietario: BigInt(userId),
+                nome,
+                endereco,
+                cidade,
+                estado,
+                pais,
+                porte,    // valores aceitos: "PEQUENO" | "MEDIO" | "GRANDE"
+                afixo,    // string
+                prefixo,  // boolean
+                sufixo,   // boolean
+            } as any);
 
-    res.status(201).json(newFazenda);
-  } catch (error) {
-    errorHandler(error as Error, req, res, () => {});
-  }
-};
+            res.status(201).json(newFazenda);
+        } catch (error) {
+            errorHandler(error as Error, req, res, () => {
+            });
+        }
+    };
 
     findAll = async (_req: Request, res: Response) => {
         try {
