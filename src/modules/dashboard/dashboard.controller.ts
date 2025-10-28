@@ -47,17 +47,17 @@ export const getDashboardData = async (req: Request, res: Response) => {
       _count: { id: true },
     });
 
-    const mapSexo = { MACHO: 0, FEMEA: 0, INDETERMINADO: 0 };
+    const mapSexo = { MACHO: 0, FEMEA: 0, TODOS: 0 };
     animaisPorSexoRaw.forEach(s => {
       if (s.sexo === "MACHO") mapSexo.MACHO = s._count.id;
       else if (s.sexo === "FEMEA") mapSexo.FEMEA = s._count.id;
-      else mapSexo.INDETERMINADO += s._count.id;
+      else mapSexo.TODOS += s._count.id;
     });
 
     const animaisPorSexoFinal = [
       { sexo: "MACHO", count: mapSexo.MACHO },
       { sexo: "FEMEA", count: mapSexo.FEMEA },
-      { sexo: "INDETERMINADO", count: mapSexo.INDETERMINADO },
+      { sexo: "TODOS", count: mapSexo.TODOS },
     ];
 
     // ------------------ ANIMAIS DOENTES ------------------
