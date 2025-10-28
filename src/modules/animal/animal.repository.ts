@@ -84,10 +84,4 @@ export const animalRepository = {
             include: includeOptions
         });
     }
-
-    return prisma.animal.findUnique({
-      where: { id: bigint },
-      include: includeOptions,
-    });
-  },
 };
