@@ -70,7 +70,7 @@ model Animal {
   registro                     String?      @db.VarChar(255)
   status                       StatusAnimal @default(VIVO)
   peso                         Float?
-  localizacao                  String       @db.VarChar(255)
+  localizacao                  String?       @db.VarChar(255)
 
   // Relações com pais (outro Animal)
   pai             Animal?  @relation("PaiRelation", fields: [idPai], references: [id], onDelete: SetNull) // ⬅️ ALTERADO AQUI
@@ -181,7 +181,7 @@ enum TipoRaca {
 enum SexoAnimal {
   MACHO
   FEMEA
-  TODOS
+  INDETERMINADO
 }
 
 enum StatusAnimal {
