@@ -53,17 +53,17 @@ async function main() {
       frequencia: FrequenciaVacina.ANUAL,
     },
   ];
+  
+      for (const vacina of vacinas) {
+        await prisma.tipoVacina.upsert({
+            where: { nome: vacina.nome },
+            update: vacina,
+            create: vacina,
+        });
+    }
 
-  const vacinasCriadas = [];
-  for (const vacina of vacinas) {
-    const v = await prisma.tipoVacina.upsert({
-      where: { nome: vacina.nome },
-      update: vacina,
-      create: vacina,
-    });
-    vacinasCriadas.push(v);
-  }
-  console.log("Tipos de vacina criados.");
+    console.log('Seed de tipos de vacina concluído.');
+
 
   // ====== USUÁRIOS ======
   const usuarios = [
