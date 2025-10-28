@@ -54,12 +54,14 @@ async function main() {
     },
   ];
   
+      const vacinasCriadas = [];
       for (const vacina of vacinas) {
-        await prisma.tipoVacina.upsert({
+        const v = await prisma.tipoVacina.upsert({
             where: { nome: vacina.nome },
             update: vacina,
             create: vacina,
         });
+        vacinasCriadas.push(v);
     }
 
     console.log('Seed de tipos de vacina concluído.');

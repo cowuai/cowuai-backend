@@ -70,19 +70,19 @@ model Animal {
   registro                     String?      @db.VarChar(255)
   status                       StatusAnimal @default(VIVO)
   peso                         Float?
-  localizacao                  String?       @db.VarChar(255)
+  localizacao                  String?      @db.VarChar(255)
 
   // Relações com pais (outro Animal)
-  pai             Animal?  @relation("PaiRelation", fields: [idPai], references: [id], onDelete: SetNull) // ⬅️ ALTERADO AQUI
-  idPai           BigInt?  @map("id_pai") @db.BigInt
-  filhosComoPai   Animal[] @relation("PaiRelation")
+  pai           Animal?  @relation("PaiRelation", fields: [idPai], references: [id], onDelete: SetNull) // ⬅️ ALTERADO AQUI
+  idPai         BigInt?  @map("id_pai") @db.BigInt
+  filhosComoPai Animal[] @relation("PaiRelation")
 
-  mae             Animal?  @relation("MaeRelation", fields: [idMae], references: [id], onDelete: SetNull) // ⬅️ ALTERADO AQUI
-  idMae           BigInt?  @map("id_mae") @db.BigInt
-  filhosComoMae   Animal[] @relation("MaeRelation")
+  mae            Animal?  @relation("MaeRelation", fields: [idMae], references: [id], onDelete: SetNull) // ⬅️ ALTERADO AQUI
+  idMae          BigInt?  @map("id_mae") @db.BigInt
+  filhosComoMae  Animal[] @relation("MaeRelation")
   // Relação com Fazenda
-  fazenda        Fazenda @relation(fields: [idFazenda], references: [id])
-  idFazenda      BigInt  @db.BigInt
+  fazenda        Fazenda  @relation(fields: [idFazenda], references: [id])
+  idFazenda      BigInt   @db.BigInt
   idProprietario BigInt?
 
   vacinacoes VacinaAplicada[]
@@ -122,7 +122,7 @@ model TipoVacina {
 
 model VacinaAplicada {
   id              BigInt     @id @default(autoincrement()) @db.BigInt
-  animal          Animal     @relation(fields: [idAnimal], references: [id], onDelete: Cascade) 
+  animal          Animal     @relation(fields: [idAnimal], references: [id], onDelete: Cascade)
   idAnimal        BigInt     @map("id_animal") @db.BigInt
   tipoVacina      TipoVacina @relation(fields: [idTipoVacina], references: [id])
   idTipoVacina    BigInt     @map("id_tipo_vacina") @db.BigInt
@@ -181,7 +181,7 @@ enum TipoRaca {
 enum SexoAnimal {
   MACHO
   FEMEA
-  INDETERMINADO
+  TODOS
 }
 
 enum StatusAnimal {
@@ -190,6 +190,8 @@ enum StatusAnimal {
   VENDIDO
   DOADO
   ROUBADO
+  DOENTE
+  REPRODUZINDO
 }
 
 enum FrequenciaVacina {
