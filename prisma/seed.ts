@@ -6,7 +6,7 @@ async function main() {
   console.log("Iniciando seed...");
 
   // ====== VACINAS ======
-  const vacinas = [
+  const vacinas = [ 
     {
       nome: "Febre Aftosa",
       descricao: "Vacina obrigatória aplicada em duas etapas anuais.",

@@ -47,5 +47,11 @@ export const fazendaRepository = {
 
     delete: (id: bigint) => {
         return prisma.fazenda.delete({where: {id}});
+    },
+
+    countFarmsByUserId(userId: bigint) {
+        return prisma.fazenda.count({
+            where: {idProprietario: userId}
+        })
     }
 };

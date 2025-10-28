@@ -119,7 +119,7 @@ export class AnimalController {
         } catch (error) {
             errorHandler(error as Error, req, res, () => {});
         }
-    }
+    };
 
     findByProprietario = async (req: Request, res: Response) => {
         try {

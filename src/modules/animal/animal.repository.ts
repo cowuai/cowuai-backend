@@ -79,9 +79,15 @@ export const animalRepository = {
             throw new Error("Relação inválida");
         }
 
-        return prisma.animal.findUnique({
+   return prisma.animal.findUnique({
             where: {id: bigint},
             include: includeOptions
+        });
+    },
+
+    countAnimalsByUserId: (userId: bigint): Promise<number> => {
+        return prisma.animal.count({
+            where: { idProprietario: userId },
         });
     }
 };

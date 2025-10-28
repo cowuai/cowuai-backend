@@ -40,6 +40,7 @@ app.get("/", async (req, res) => {
 
 app.use("/api/cadastro", cadastroRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/perfil", perfilRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/fazendas", fazendaRoutes);
 app.use("/api/animais", animalRoutes);

@@ -13,6 +13,8 @@ import {TipoVacinaService} from "../modules/vacina/tipoVacina.service";
 import {TipoVacinaController} from "../modules/vacina/tipoVacina.controller";
 import {AplicacaoVacinaService} from "../modules/vacina/aplicacaoVacina.service";
 import {AplicacaoVacinaController} from "../modules/vacina/aplicacaoVacina.controller";
+import {PerfilController} from "../modules/perfil/perfil.controller";
+import {PerfilService} from "../modules/perfil/perfil.service";
 
 // Auth
 container.registerSingleton(AuthService, AuthService);
@@ -41,3 +43,7 @@ container.registerSingleton(TipoVacinaController, TipoVacinaController);
 // Vacina
 container.registerSingleton(AplicacaoVacinaService, AplicacaoVacinaService);
 container.registerSingleton(AplicacaoVacinaController, AplicacaoVacinaController);
+
+// Perfil
+container.registerSingleton(PerfilService, PerfilService);
+container.registerSingleton(PerfilController, PerfilController);
