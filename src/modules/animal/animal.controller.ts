@@ -22,7 +22,8 @@ export class AnimalController {
                 idPai,
                 idMae,
                 idProprietario,
-                idFazenda
+                idFazenda,
+                localizacao
             } = req.body;
 
             const newAnimal = await this.animalService.create({
@@ -39,7 +40,7 @@ export class AnimalController {
                 idMae: idMae ?? null,
                 idProprietario: idProprietario ?? null,
                 idFazenda,
-                localizacao: ""
+                localizacao: localizacao ?? null
             });
 
             res.status(201).json(newAnimal);
