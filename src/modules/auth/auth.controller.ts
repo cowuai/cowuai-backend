@@ -5,12 +5,18 @@ import {debug} from "node:util";
 
 @injectable()
 export class AuthController {
-    constructor(@inject(AuthService) private authService: AuthService) {}
+    constructor(@inject(AuthService) private authService: AuthService) {
+    }
 
     login = async (req: Request, res: Response) => {
         try {
-            const { email, senha, dispositivo } = req.body;
-            const { accessToken, refreshToken, user, expiresIn } = await this.authService.login(email, senha, dispositivo);
+            const {email, senha, dispositivo} = req.body;
+            const {
+                accessToken,
+                refreshToken,
+                user,
+                expiresIn
+            } = await this.authService.login(email, senha, dispositivo);
             console.log('Nova requisição recebida em /login');
 
             res.cookie("refreshToken", refreshToken, {
@@ -21,35 +27,35 @@ export class AuthController {
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 dias
             })
 
-            return res.status(200).json({ accessToken, user, expiresIn });
+            return res.status(200).json({accessToken, user, expiresIn});
         } catch (err: any) {
             console.error("Erro ao logar:", err);
-            return res.status(400).json({ error: err.message });
+            return res.status(400).json({error: err.message});
         }
     }
 
     refresh = async (req: Request, res: Response) => {
         try {
-            const { refreshToken: bodyToken } = req.body;
+            const {refreshToken: bodyToken} = req.body;
             const refreshToken = req.cookies.refreshToken || bodyToken;
             console.log("Refresh Token:", refreshToken);
 
-            if (!refreshToken) return res.status(401).json({ error: "Refresh token ausente" });
+            if (!refreshToken) return res.status(401).json({error: "Refresh token ausente"});
 
-            const { accessToken, user, expiresIn } = await this.authService.refresh(refreshToken); //inclui user
-             return res.json({ accessToken, user, expiresIn }); // <<< devolve user
+            const {accessToken, user, expiresIn} = await this.authService.refresh(refreshToken); //inclui user
+            return res.json({accessToken, user, expiresIn}); // <<< devolve user
         } catch (err: any) {
-            return res.status(401).json({ error: err.message });
+            return res.status(401).json({error: err.message});
         }
     };
 
     logout = async (req: Request, res: Response) => {
         try {
-            const { userId } = (req as any).user;
+            const {userId} = (req as any).user;
             console.log('Nova requisição recebida em /logout');
 
             if (!userId) {
-                return res.status(401).json({ error: "Usuário não autenticado." });
+                return res.status(401).json({error: "Usuário não autenticado."});
             }
 
             // limpo o refresh token no servidor (BD)
@@ -65,7 +71,30 @@ export class AuthController {
 
             return res.status(204).send();
         } catch (err: any) {
-            return res.status(400).json({ error: err.message });
+            return res.status(400).json({error: err.message});
+        }
+    }
+
+    forgotPassword = async (req: Request, res: Response) => {
+        try {
+            const {email} = req.body;
+
+            await this.authService.forgotPassword(email);
+            return res.status(200).json({message: "Instruções para redefinição de senha enviadas para o email."});
+        } catch (err: any) {
+            return res.status(400).json({error: err.message});
+        }
+    }
+
+    resetPassword = async (req: Request, res: Response) => {
+        try {
+            const {token} = req.params;
+            const {novaSenha} = req.body;
+
+            await this.authService.resetPassword(token, novaSenha);
+            return res.status(200).json({message: "Senha redefinida com sucesso."});
+        } catch (err: any) {
+            return res.status(400).json({error: err.message});
         }
     }
 }

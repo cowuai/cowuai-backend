@@ -24,4 +24,8 @@ export const usuarioRepository = {
 
     delete: (id: bigint) =>
         prisma.usuario.delete({where: {id}}),
+
+    findByResetToken: (token: string) => {
+        return prisma.usuario.findFirst({where: {resetPasswordToken: token}});
+    }
 }

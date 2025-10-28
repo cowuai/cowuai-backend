@@ -5,6 +5,8 @@ import {UsuarioService} from "../usuario/usuario.service";
 import {inject, injectable} from "tsyringe";
 import {randomUUID} from "node:crypto";
 import {prisma} from "../../config/prisma";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 @injectable()
 export class AuthService {
@@ -62,8 +64,8 @@ export class AuthService {
     async refresh(refreshToken: string) {
         const stored = await prisma.refreshToken.findUnique({
             where: {token: refreshToken},
-            include: { usuario: true }, // pega o usuário junto    
-            });
+            include: {usuario: true}, // pega o usuário junto
+        });
         if (!stored || stored.expiresAt < new Date()) {
             throw new Error("Refresh token inválido ou expirado");
         }
@@ -75,10 +77,10 @@ export class AuthService {
         );
 
         return {
-            accessToken: newAccessToken, 
-             user: stored.usuario,          // <<< retorna o usuário junto 
+            accessToken: newAccessToken,
+            user: stored.usuario,          // <<< retorna o usuário junto
             expiresIn: jwtConfig.expiresIn,
-            
+
         };
     }
 
@@ -86,5 +88,62 @@ export class AuthService {
         if (!idUsuario) throw new Error("ID do usuário é obrigatório");
 
         await prisma.refreshToken.deleteMany({where: {idUsuario: BigInt(idUsuario)}});
+    }
+
+    async forgotPassword(email: string) {
+        const user = await this.usuarioService.findByEmail(email);
+        if (!user) throw new Error("Usuário não encontrado");
+
+        // Gera um token aleatório seguro (não JWT)
+        const token = crypto.randomBytes(32).toString("hex");
+
+        // Define expiração (15 minutos, por exemplo)
+        const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+        // Atualiza o usuário com o token e expiração
+        await this.usuarioService.update(user.id, {
+            resetPasswordToken: token,
+            resetPasswordExpires: expires,
+        });
+
+        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: "Redefinição de senha",
+            html: `
+      <p>Olá ${user.nome},</p>
+      <p>Clique no link abaixo para redefinir sua senha (válido por 15 minutos):</p>
+      <a href="${resetLink}">${resetLink}</a>
+    `,
+        });
+    }
+
+    async resetPassword(token: string, novaSenha: string) {
+        // Busca o usuário pelo token e verifica se não expirou
+        const user = await this.usuarioService.findByResetToken(token);
+
+        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+            throw new Error("Token inválido ou expirado");
+        }
+
+        const hashedPassword = await bcrypt.hash(novaSenha, 10);
+
+        await this.usuarioService.update(user.id, {
+            senha: hashedPassword,
+            resetPasswordToken: null, // invalida o token
+            resetPasswordExpires: null,
+        });
+
+        return { message: "Senha redefinida com sucesso!" };
     }
 }
