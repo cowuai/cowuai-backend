@@ -8,6 +8,13 @@ export const getDashboardData = async (req: Request, res: Response) => {
         // ------------------ VACINAÇÕES POR MÊS ------------------
         const vacinacoes = await prisma.vacinaAplicada.findMany({
             select: {dataAplicacao: true},
+            where: {
+                animal: {
+                    fazenda: {
+                        idProprietario: BigInt(userId),
+                    },
+                }
+            }
         });
 
         const vacinacoesPorMesMap: Record<string, number> = {};
@@ -24,36 +31,51 @@ export const getDashboardData = async (req: Request, res: Response) => {
         // ------------------ ANIMAIS POR LOCALIZAÇÃO ------------------
         const animaisPorLocalizacaoRaw = await prisma.animal.groupBy({
             by: ["localizacao"],
-            _count: {id: true},
+            _count: { _all: true },
+            where: {
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                },
+            },
         });
 
         const animaisPorLocalizacao = animaisPorLocalizacaoRaw.map(a => ({
             label: a.localizacao ?? "Não informada",
-            count: a._count.id,
+            count: a._count._all,
         }));
 
         // ------------------ TIPO DE RAÇA ------------------
         const tipoRacaRaw = await prisma.animal.groupBy({
             by: ["tipoRaca"],
-            _count: {id: true},
+            _count: {_all: true},
+            where: {
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                }
+            }
         });
 
         const tipoRaca = tipoRacaRaw.map(r => ({
             label: r.tipoRaca ?? "Desconhecida",
-            count: r._count.id,
+            count: r._count._all,
         }));
 
         // ------------------ ANIMAIS POR SEXO ------------------
         const animaisPorSexoRaw = await prisma.animal.groupBy({
             by: ["sexo"],
-            _count: {id: true},
+            _count: {_all: true},
+            where: {
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                }
+            }
         });
 
         const mapSexo = {MACHO: 0, FEMEA: 0, TODOS: 0};
         animaisPorSexoRaw.forEach(s => {
-            if (s.sexo === "MACHO") mapSexo.MACHO = s._count.id;
-            else if (s.sexo === "FEMEA") mapSexo.FEMEA = s._count.id;
-            else mapSexo.TODOS += s._count.id;
+            if (s.sexo === "MACHO") mapSexo.MACHO = s._count._all;
+            else if (s.sexo === "FEMEA") mapSexo.FEMEA = s._count._all;
+            else mapSexo.TODOS += s._count._all;
         });
 
         const animaisPorSexoFinal = [
@@ -64,23 +86,49 @@ export const getDashboardData = async (req: Request, res: Response) => {
 
         // ------------------ ANIMAIS DOENTES ------------------
         const animaisDoentes = await prisma.animal.count({
-            where: {status: "DOENTE"},
+            where: {
+                status: "DOENTE",
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                }
+            },
         });
 
         // ------------------ TAXA DE REPRODUÇÃO E TOTAL ANIMAIS ------------------
-        const totalAnimais = await prisma.animal.count();
+        const totalAnimais = await prisma.animal.count({
+            where: {
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                }
+            }
+        });
         const animaisReprodutivos = await prisma.animal.count({
-            where: {status: "REPRODUZINDO"},
+            where: {
+                status: "REPRODUZINDO",
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                }
+            },
         });
 
         // ------------------ TOTAL DE ANIMAIS COM REGISTRO -------------------
         const totalAnimaisComRegistro = await prisma.animal.count({
-            where: {registro: {not: null}},
+            where: {
+                registro: {not: null},
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                }
+            },
         });
 
         // ------------------ TOTAL DE ANIMAIS VENDIDOS -------------------
         const totalAnimaisVendidos = await prisma.animal.count({
-            where: {status: "VENDIDO"},
+            where: {
+                status: "VENDIDO",
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                }
+            },
         });
 
         // ------------------ TOTAL DE FAZENDAS DO CRIADOR -------------------
