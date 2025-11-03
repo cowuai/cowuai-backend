@@ -97,7 +97,7 @@ export class AuthService {
         // Gera um token aleatório seguro (não JWT)
         const token = crypto.randomBytes(32).toString("hex");
 
-        // Define expiração (15 minutos, por exemplo)
+        // Define expiração (15 minutos)
         const expires = new Date(Date.now() + 15 * 60 * 1000);
 
         // Atualiza o usuário com o token e expiração
@@ -106,7 +106,10 @@ export class AuthService {
             resetPasswordExpires: expires,
         });
 
-        const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+        const resetLink = `${process.env.FRONTEND_URL}/esqueci-a-senha/${token}`;
+
+        console.log(`EMAIL_USER: ${process.env.EMAIL_USER}`);
+        console.log(`EMAIL_PASS: ${process.env.EMAIL_PASS}`);
 
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -119,12 +122,64 @@ export class AuthService {
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
-            subject: "Redefinição de senha",
+            subject: "🔒 Redefinição de senha - CowUai",
             html: `
-      <p>Olá ${user.nome},</p>
-      <p>Clique no link abaixo para redefinir sua senha (válido por 15 minutos):</p>
-      <a href="${resetLink}">${resetLink}</a>
-    `,
+              <div style="
+                font-family: 'Segoe UI', sans-serif;
+                background-color: #f5f5f4;
+                color: #0c0a09;
+                padding: 24px;
+              ">
+                <div style="
+                  max-width: 500px;
+                  margin: 0 auto;
+                  background-color: #ffffff;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                ">
+                  <div style="background-color: #7f1d1d; padding: 24px; text-align: center;">
+                    <img src="https://i.imgur.com/XW73z8m.png" alt="CowUai" width="64" style="margin-bottom: 8px;">
+                    <h1 style="color: #ffffff; font-size: 20px; margin: 0;">CowUai</h1>
+                  </div>
+                  <div style="padding: 24px;">
+                    <h2 style="font-size: 18px; color: #7f1d1d;">Olá, ${user.nome}!</h2>
+                    <p style="line-height: 1.6; font-size: 15px;">
+                      Recebemos uma solicitação para redefinir sua senha.<br>
+                      Clique no botão abaixo para criar uma nova senha. Este link é válido por <strong>15 minutos</strong>.
+                    </p>
+            
+                    <div style="text-align: center; margin: 32px 0;">
+                      <a href="${resetLink}" style="
+                        background-color: #7f1d1d;
+                        color: #ffffff;
+                        text-decoration: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        display: inline-block;
+                      ">
+                        Redefinir minha senha
+                      </a>
+                    </div>
+            
+                    <p style="font-size: 13px; color: #57534e;">
+                      Se você não solicitou essa alteração, ignore este e-mail.<br>
+                      Sua conta permanecerá segura.
+                    </p>
+                  </div>
+                  <div style="
+                    background-color: #f5f5f4;
+                    text-align: center;
+                    padding: 16px;
+                    font-size: 12px;
+                    color: #78716c;
+                  ">
+                    © ${new Date().getFullYear()} CowUai — Todos os direitos reservados.
+                  </div>
+                </div>
+              </div>
+              `,
         });
     }
 
@@ -144,6 +199,16 @@ export class AuthService {
             resetPasswordExpires: null,
         });
 
-        return { message: "Senha redefinida com sucesso!" };
+        return {message: "Senha redefinida com sucesso!"};
+    }
+
+    async validateResetToken(token: string) {
+        const user = await this.usuarioService.findByResetToken(token);
+
+        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+            throw new Error("Token inválido ou expirado");
+        }
+
+        return {message: "Token válido."};
     }
 }

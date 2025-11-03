@@ -88,11 +88,21 @@ export class AuthController {
 
     resetPassword = async (req: Request, res: Response) => {
         try {
-            const {token} = req.params;
-            const {novaSenha} = req.body;
+            const {token, password} = req.body;
 
-            await this.authService.resetPassword(token, novaSenha);
+            await this.authService.resetPassword(token, password);
             return res.status(200).json({message: "Senha redefinida com sucesso."});
+        } catch (err: any) {
+            return res.status(400).json({error: err.message});
+        }
+    }
+
+    validateResetToken = async (req: Request, res: Response) => {
+        try {
+            const {token} = req.body;
+
+            await this.authService.validateResetToken(token);
+            return res.status(200).json({message: "Token válido."});
         } catch (err: any) {
             return res.status(400).json({error: err.message});
         }
