@@ -45,14 +45,13 @@ COPY --from=builder /app/dist ./dist
 # Copia o schema do Prisma (necessário para o 'migrate deploy')
 COPY --from=builder /app/prisma ./prisma
 
-# Copia o cliente Prisma gerado
+# Copia o cliente Prisma gerado DEPOIS do install
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
-# O seu .env define a porta 3333
+# A porta 3333 é definida no seu .env
 ENV PORT 3333
 EXPOSE 3333
 
 # O package.json define "start": "node dist/server.js"
-# O comando final será definido no docker-compose.yml para incluir a migração.
 CMD [ "npm", "start" ]
