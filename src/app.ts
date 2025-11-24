@@ -10,23 +10,30 @@ import usuarioRoutes from "./modules/usuario/usuario.routes";
 import cadastroRoutes from "./modules/cadastro/cadastro.route";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes";
 import perfilRoutes from "./modules/perfil/perfil.route";
-import { errorHandler } from "./middlewares/errorHandler";
-import { prisma } from "./config/prisma";
+import {errorHandler} from "./middlewares/errorHandler";
+import {prisma} from "./config/prisma";
 import cors from "cors";
 import "./shared/container"; // Importa as configurações do container de injeção de dependências
 import cookieParser from "cookie-parser";
-// NOVAS IMPORTAÇÕES DO SWAGGER (Caminho corrigido!)
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swaggerConfig";
 
 const app = express();
 
 app.use(
-  cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:3000"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  })
+    cors({
+        origin: (origin, callback) => {
+            const allowed = (process.env.FRONTEND_URL || "https://www.cowuai.com.br")
+                .split(",")
+                .map((s) => s.trim());
+            if (!origin) return callback(null, true);
+            if (allowed.includes(origin)) return callback(null, true);
+            return callback(null, false);
+        },
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        exposedHeaders: ["Set-Cookie", "Authorization"],
+    })
 );
 
 app.use(express.json());
@@ -34,14 +41,14 @@ app.use(cookieParser());
 
 // Verifica conexão
 app.get("/", async (req, res) => {
-  try {
-    await prisma.$connect();
-    res.send("CowUai Backend funcionando e banco de dados conectado! ✅");
-  } catch (error) {
-    res
-      .status(500)
-      .send("CowUai Backend funcionando, mas com erro no banco de dados. ❌");
-  }
+    try {
+        await prisma.$connect();
+        res.send("CowUai Backend funcionando e banco de dados conectado! ✅");
+    } catch (error) {
+        res
+            .status(500)
+            .send("CowUai Backend funcionando, mas com erro no banco de dados. ❌");
+    }
 });
 
 // ROTAS DA API
