@@ -506,7 +506,7 @@ router.post(
  * @swagger
  * /api/doencas-animal/{id}:
  *   put:
- *     summary: Atualiza um registro de doença do animal (ex.: encerrar tratamento)
+ *     summary: "Atualiza um registro de doença do animal (ex.: encerrar tratamento)"
  *     tags: [Doenças do Animal]
  *     parameters:
  *       - in: path
