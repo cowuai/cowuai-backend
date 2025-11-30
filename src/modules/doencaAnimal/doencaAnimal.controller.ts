@@ -4,38 +4,45 @@ import { inject, injectable } from "tsyringe";
 import { z } from "zod";
 import { DoencaAnimalService } from "./doencaAnimal.services";
 
+/**
+ * Schema base para criação de doença do animal
+ * OBS: removemos .datetime() para aceitar "YYYY-MM-DD"
+ * e usamos z.coerce.number() para aceitar número ou string no idDoenca.
+ */
 const createDoencaAnimalSchema = z.object({
   idAnimal: z
     .string()
     .regex(/^\d+$/, "idAnimal deve ser um número inteiro positivo"),
-  idDoenca: z
-    .string()
-    .regex(/^\d+$/, "idDoenca deve ser um número inteiro positivo"),
-  dataDiagnostico: z
-    .string()
-    .datetime({ message: "dataDiagnostico deve ser uma data válida ISO" }),
+
+  // front envia Number(form.idDoenca), então usamos coerce.number()
+  idDoenca: z.coerce
+    .number()
+    .int()
+    .positive({ message: "idDoenca deve ser um número inteiro positivo" }),
+
+  // vem como "2025-11-30" ou já definido pelo front
+  dataDiagnostico: z.string().min(1, "dataDiagnostico é obrigatória"),
+
   emTratamento: z.boolean().optional(),
-  dataFimTratamento: z
-    .string()
-    .datetime({ message: "dataFimTratamento deve ser uma data válida ISO" })
-    .nullable()
-    .optional(),
+
+  // pode ser string "2025-12-01", null, ou ausente
+  dataFimTratamento: z.string().nullable().optional(),
+
   observacoes: z.string().max(1000).nullable().optional(),
 });
 
-// Para rotas /animal/:idAnimal/doencas → o idAnimal vem da rota, não do body
+// Para rotas /doencas-animal/animal/:idAnimal → o idAnimal vem da rota
 const createDoencaAnimalForAnimalSchema = createDoencaAnimalSchema.omit({
   idAnimal: true,
 });
 
+// Para update: não pode alterar idAnimal nem idDoenca
 const updateDoencaAnimalSchema = createDoencaAnimalSchema
   .omit({ idAnimal: true, idDoenca: true })
   .partial();
 
 const idParamSchema = z.object({
-  id: z
-    .string()
-    .regex(/^\d+$/, "ID deve ser um número inteiro positivo"),
+  id: z.string().regex(/^\d+$/, "ID deve ser um número inteiro positivo"),
 });
 
 const idAnimalParamSchema = z.object({
@@ -58,7 +65,16 @@ export class DoencaAnimalController {
   create = async (req: Request, res: Response) => {
     try {
       const data = createDoencaAnimalSchema.parse(req.body);
-      const registro = await this.doencaAnimalService.criar(data);
+
+      const registro = await this.doencaAnimalService.criar({
+        idAnimal: data.idAnimal,
+        idDoenca: String(data.idDoenca), // garante string
+        dataDiagnostico: data.dataDiagnostico,
+        emTratamento: data.emTratamento,
+        dataFimTratamento: data.dataFimTratamento,
+        observacoes: data.observacoes,
+      });
+
       return res.status(201).json(registro);
     } catch (err: any) {
       if (err instanceof z.ZodError) {
@@ -74,7 +90,7 @@ export class DoencaAnimalController {
 
   /**
    * Cria um novo registro de doença para um animal específico
-   * Rota esperada: POST /animal/:idAnimal/doencas
+   * Rota esperada: POST /doencas-animal/animal/:idAnimal
    * (idAnimal vem da rota, o body NÃO precisa conter idAnimal)
    */
   createForAnimal = async (req: Request, res: Response) => {
@@ -84,7 +100,11 @@ export class DoencaAnimalController {
 
       const registro = await this.doencaAnimalService.criar({
         idAnimal,
-        ...body,
+        idDoenca: String(body.idDoenca),
+        dataDiagnostico: body.dataDiagnostico,
+        emTratamento: body.emTratamento,
+        dataFimTratamento: body.dataFimTratamento,
+        observacoes: body.observacoes,
       });
 
       return res.status(201).json(registro);
@@ -95,10 +115,7 @@ export class DoencaAnimalController {
           issues: err.issues,
         });
       }
-      console.error(
-        "Erro ao criar registro de doença para o animal:",
-        err
-      );
+      console.error("Erro ao criar registro de doença para o animal:", err);
       return res.status(400).json({ error: err.message });
     }
   };
@@ -106,6 +123,7 @@ export class DoencaAnimalController {
   /**
    * Lista todas as doenças registradas para um animal
    * Usada por rotas que chamam: controller.findByAnimal
+   * e também pelo alias listByAnimal
    */
   findByAnimal = async (req: Request, res: Response) => {
     try {
@@ -113,6 +131,14 @@ export class DoencaAnimalController {
       const registros = await this.doencaAnimalService.listarPorAnimal(
         idAnimal
       );
+
+      // Se quiser manter 404 quando não tiver nada:
+      if (!registros || registros.length === 0) {
+        return res.status(404).json({
+          error: `Nenhuma doença encontrada para o animal ${idAnimal}`,
+        });
+      }
+
       return res.json(registros);
     } catch (err: any) {
       if (err instanceof z.ZodError) {
@@ -131,13 +157,12 @@ export class DoencaAnimalController {
 
   /**
    * Alias para compatibilizar com rotas que usam listByAnimal
-   * (apenas delega para findByAnimal)
    */
   listByAnimal = this.findByAnimal;
 
   /**
-   * Lista apenas as doenças ATIVAS para um animal (em tratamento ou sem data fim)
-   * Pensada para rota: GET /animal/:idAnimal/doencas/ativas
+   * Lista apenas as doenças ATIVAS para um animal
+   * (emTratamento = true ou sem dataFimTratamento)
    */
   listAtivasByAnimal = async (req: Request, res: Response) => {
     try {
@@ -147,11 +172,14 @@ export class DoencaAnimalController {
       );
 
       const ativos = (registros || []).filter((reg: any) => {
-        // Ativo se:
-        // - emTratamento === true  OU
-        // - NÃO tem dataFimTratamento
         return reg.emTratamento || !reg.dataFimTratamento;
       });
+
+      if (!ativos || ativos.length === 0) {
+        return res.status(404).json({
+          error: `Nenhuma doença ativa encontrada para o animal ${idAnimal}`,
+        });
+      }
 
       return res.json(ativos);
     } catch (err: any) {
