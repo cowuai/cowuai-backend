@@ -13,7 +13,7 @@ const swaggerOptions = {
       },
     ],
   }, // CORREÇÃO AQUI: Caminho para encontrar todos os arquivos *.routes.ts dentro de modules
-  apis: ["./src/modules/**/*.routes.ts"],
+  apis: ["./src/modules/**/*.ts"],
 };
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 
