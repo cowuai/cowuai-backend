@@ -86,6 +86,7 @@ model Animal {
   idProprietario BigInt?
 
   vacinacoes VacinaAplicada[]
+  doencas         DoencaAnimal[]
 
   @@map("animal")
 }
@@ -137,6 +138,42 @@ model VacinaAplicada {
 
   @@map("vacina_aplicada")
 }
+
+model Doenca {
+  id              BigInt   @id @default(autoincrement()) @db.BigInt
+  nome            String   @unique @db.VarChar(255)
+  descricao       String?  @db.VarChar(1000)
+  ehCronica       Boolean  @default(false) @map("eh_cronica")
+  dataCadastro    DateTime @default(now()) @map("data_cadastro")
+  dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
+
+  doencasAnimal   DoencaAnimal[]
+
+  @@map("doenca")
+}
+
+
+model DoencaAnimal {
+  id                   BigInt   @id @default(autoincrement()) @db.BigInt
+  idAnimal             BigInt   @map("id_animal") @db.BigInt
+  idDoenca             BigInt   @map("id_doenca") @db.BigInt
+  dataDiagnostico      DateTime @map("data_diagnostico")
+  emTratamento         Boolean  @default(true) @map("em_tratamento")
+  dataInicioTratamento DateTime? @map("data_inicio_tratamento")
+  dataFimTratamento    DateTime? @map("data_fim_tratamento")
+  observacoes          String?  @db.VarChar(2000)
+  dataCadastro         DateTime @default(now()) @map("data_cadastro")
+  dataAtualizacao      DateTime @updatedAt @map("data_atualizacao")
+
+  animal               Animal   @relation(fields: [idAnimal], references: [id])
+  doenca               Doenca   @relation(fields: [idDoenca], references: [id])
+
+  @@index([idAnimal])
+  @@index([idDoenca])
+
+  @@map("doenca_animal")
+}
+
 
 // ==========================
 // Enums
