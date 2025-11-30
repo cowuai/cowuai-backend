@@ -10,6 +10,8 @@ import usuarioRoutes from "./modules/usuario/usuario.routes";
 import cadastroRoutes from "./modules/cadastro/cadastro.route";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes";
 import perfilRoutes from "./modules/perfil/perfil.route";
+import doencaRoutes from "./modules/doenca/doenca.routes";
+import doencaAnimalRoutes from "./modules/doencaAnimal/doencaAnimal.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { prisma } from "./config/prisma";
 import cors from "cors";
@@ -56,6 +58,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/tipos-raca", tipoRacaRoutes);
 app.use("/api/tipos-vacina", tipoVacinaRoutes);
 app.use("/api/aplicacoes-vacina", aplicacaoVacinaRoutes);
+app.use("/api/doencas", doencaRoutes);
+app.use("/api/doencas-animal", doencaAnimalRoutes);
 
 // ROTA DA DOCUMENTAÇÃO DO SWAGGER (Adicionada aqui)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
