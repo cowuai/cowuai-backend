@@ -12,6 +12,20 @@ const swaggerOptions = {
         url: "http://localhost:3333", // Ok se seu servidor estiver nesta porta
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   }, // CORREÇÃO AQUI: Caminho para encontrar todos os arquivos *.routes.ts dentro de modules
   apis: ["./src/modules/**/*.routes.ts"],
 };
