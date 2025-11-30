@@ -9,10 +9,10 @@ import {TipoRacaService} from "../modules/tipoRaca/tipoRaca.service";
 import {TipoRacaController} from "../modules/tipoRaca/tipoRaca.controller";
 import {AnimalController} from "../modules/animal/animal.controller";
 import {AnimalService} from "../modules/animal/animal.service";
-import {TipoVacinaService} from "../modules/vacina/tipoVacina.service";
-import {TipoVacinaController} from "../modules/vacina/tipoVacina.controller";
-import {AplicacaoVacinaService} from "../modules/vacina/aplicacaoVacina.service";
-import {AplicacaoVacinaController} from "../modules/vacina/aplicacaoVacina.controller";
+import {TipoVacinaService} from "../modules/tipoVacina/tipoVacina.service";
+import {TipoVacinaController} from "../modules/tipoVacina/tipoVacina.controller";
+import {AplicacaoVacinaService} from "../modules/aplicacaoVacina/aplicacaoVacina.service";
+import {AplicacaoVacinaController} from "../modules/aplicacaoVacina/aplicacaoVacina.controller";
 import {PerfilController} from "../modules/perfil/perfil.controller";
 import {PerfilService} from "../modules/perfil/perfil.service";
 
