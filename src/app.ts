@@ -1,3 +1,7 @@
+import { config as dotenvSafeConfig } from "dotenv-safe";
+
+dotenvSafeConfig({ example: ".env.example", allowEmptyValues: false });
+
 import "reflect-metadata";
 import express from "express";
 import fazendaRoutes from "./modules/fazenda/fazenda.routes";
@@ -13,24 +17,26 @@ import perfilRoutes from "./modules/perfil/perfil.route";
 import { errorHandler } from "./middlewares/errorHandler";
 import { prisma } from "./config/prisma";
 import cors from "cors";
-import "./shared/container"; // Importa as configurações do container de injeção de dependências
+import "./shared/container";
 import cookieParser from "cookie-parser";
-// NOVAS IMPORTAÇÕES DO SWAGGER (Caminho corrigido!)
 import swaggerUi from "swagger-ui-express";
-import swaggerDocs from "./swaggerConfig";
+import swaggerDocs from "./config/swaggerConfig";
+import "./config/passport";
+import passport from "passport";
 
 const app = express();
 
 app.use(
-  cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:3000"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  })
+    cors({
+        origin: process.env.NODE_ENV === "production" ? process.env.FRONTEND_URL : process.env.TEST_FRONTEND_URL,
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    })
 );
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(passport.initialize());
 
 // Verifica conexão
 app.get("/", async (req, res) => {
@@ -44,8 +50,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-// ROTAS DA API
-
+// Rotas da API
 app.use("/api/cadastro", cadastroRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/perfil", perfilRoutes);
@@ -56,11 +61,9 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/tipos-raca", tipoRacaRoutes);
 app.use("/api/tipos-vacina", tipoVacinaRoutes);
 app.use("/api/aplicacoes-vacina", aplicacaoVacinaRoutes);
-
-// ROTA DA DOCUMENTAÇÃO DO SWAGGER (Adicionada aqui)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// MIDDLEWARE DE TRATAMENTO DE ERROS (Deve ser o último)
+// Middleware de tratamento de erros
 app.use(errorHandler);
 
 export default app;

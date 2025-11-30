@@ -1,7 +1,6 @@
 import {Request, Response} from "express";
 import {AuthService} from "./auth.service";
 import {inject, injectable} from "tsyringe";
-import {debug} from "node:util";
 
 @injectable()
 export class AuthController {
@@ -105,6 +104,41 @@ export class AuthController {
             return res.status(200).json({message: "Token válido."});
         } catch (err: any) {
             return res.status(400).json({error: err.message});
+        }
+    }
+
+    googleCallback = async (req: Request, res: Response) => {
+        try {
+            // O passport adiciona o usuário em req.user após o sucesso
+            const user = (req as any).user;
+
+            if (!user) {
+                return res.status(401).json({ error: "Falha na autenticação Google" });
+            }
+
+            // Gera os tokens usando o serviço
+            const { accessToken, refreshToken } = await this.authService.generateTokensForUser(user, "GoogleWeb");
+
+            // Configura o cookie do Refresh Token igual ao login normal
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                path: '/',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
+            // REDIRECIONAMENTO:
+            // Diferente do login normal (JSON), o OAuth acontece via redirect do navegador.
+            // Precisamos redirecionar de volta para o Front-end passando o AccessToken.
+            // O Front vai pegar esse token da URL e salvar.
+
+            const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+            return res.redirect(`${frontendUrl}/auth/callback?accessToken=${accessToken}`);
+
+        } catch (err: any) {
+            console.error("Erro no callback do Google:", err);
+            return res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
         }
     }
 }

@@ -4,24 +4,40 @@ import {injectable} from "tsyringe";
 
 @injectable()
 export class UsuarioService {
-    create = async (data: Omit<Usuario, "id" | "dataCadastro" | "dataAtualizacao">) => {
-        const existingCpf = await usuarioRepository.findByCpf(data.cpf)
-        if (existingCpf) {
-            throw new Error("Usuario com esse CPF já existe");
+    create = async (data: Prisma.UsuarioCreateInput) => {
+        // Se for registro via Google, CPF pode ser opcional; email continua obrigatório
+        if (!data.googleId) {
+            if (!data.cpf || !data.email) {
+                throw new Error("CPF e E-mail são obrigatórios");
+            }
+        } else {
+            if (!data.email) {
+                throw new Error("E-mail é obrigatório para autenticação Google");
+            }
         }
-        const existingEmail = await usuarioRepository.findByEmail(data.email)
-        if (existingEmail) {
-            throw new Error("Usuario com esse E-mail já existe");
+
+        if (data.cpf) {
+            const existingCpf = await usuarioRepository.findByCpf(data.cpf)
+            if (existingCpf) {
+                throw new Error("Usuario com esse CPF já existe");
+            }
         }
-        const dataNascimento = data.dataNascimento
-        if (!validaDataDeNascimento(data.dataNascimento)) {
-            throw new Error("dataNascimento inválida (futura ou formato inválido)");
+
+        if (data.email) {
+            const existingEmail = await usuarioRepository.findByEmail(data.email)
+            if (existingEmail) {
+                throw new Error("Usuario com esse E-mail já existe");
+            }
         }
-        // cria e retorna o novo usuário
+
+        if (!data.googleId && !validaDataDeNascimento(data.dataNascimento)) {
+            throw new Error("Data de nascimento inválida (futura ou formato inválido)");
+        }
+
+        // Cria e retorna o novo usuário
         return usuarioRepository.create(data);
     }
 
-    // READ
     findAll = async () => {
         return usuarioRepository.findAll()
     }
@@ -40,6 +56,10 @@ export class UsuarioService {
 
     findByEmail = async (email: string) => {
         return usuarioRepository.findByEmail(email);
+    }
+
+    findByGoogleId = async (googleId: string) => {
+        return usuarioRepository.findByGoogleId(googleId);
     }
 
     update = async (id: bigint, data: Prisma.UsuarioUpdateInput) => {
@@ -67,9 +87,8 @@ export class UsuarioService {
 }
 
 // Valida data de nascimento (não pode ser no futuro)
-// Aceita ‘string’ | Date | null | undefined
 function validaDataDeNascimento(data: string | Date | null | undefined): boolean {
-    if (data == null) return true; // ok se for opcional
+    if (data == null) return true;
 
     const d = typeof data === 'string' ? new Date(data) : data;
     if (isNaN(d.getTime())) return false;
@@ -78,6 +97,3 @@ function validaDataDeNascimento(data: string | Date | null | undefined): boolean
     hoje.setHours(0, 0, 0, 0);
     return d <= hoje;
 }
-
-
-
