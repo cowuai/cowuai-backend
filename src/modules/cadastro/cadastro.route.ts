@@ -25,6 +25,7 @@ router.post("/", async (req, res) => {
             cpf,
             nome,
             email,
+            googleId: null,
             senha: hashedPassword,
             dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
             ativo: true,

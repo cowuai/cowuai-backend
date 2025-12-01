@@ -18,9 +18,51 @@ export class AuthService {
 
         if (!user) throw new Error("Usuário não encontrado");
 
+        if (!user.senha) throw new Error("Usuário cadastrado via provedor externo. Use o login social.");
+
         const isPasswordValid = await bcrypt.compare(password, user.senha);
         if (!isPasswordValid) throw new Error("Senha inválida");
 
+        const {accessToken, refreshToken} = await this.generateTokensForUser(user, dispositivo);
+
+        return {
+            accessToken,
+            refreshToken,
+            user,
+            expiresIn: jwtConfig.expiresIn
+        };
+    }
+
+    async refresh(refreshToken: string) {
+        const stored = await prisma.refreshToken.findUnique({
+            where: {token: refreshToken},
+            include: {usuario: true},
+        });
+        if (!stored || stored.expiresAt < new Date()) {
+            throw new Error("Refresh token inválido ou expirado");
+        }
+
+        const newAccessToken = jwt.sign(
+            {userId: stored.idUsuario},
+            jwtConfig.secret,
+            {expiresIn: jwtConfig.expiresIn}
+        );
+
+        return {
+            accessToken: newAccessToken,
+            user: stored.usuario,
+            expiresIn: jwtConfig.expiresIn,
+
+        };
+    }
+
+    async logout(idUsuario: string) {
+        if (!idUsuario) throw new Error("ID do usuário é obrigatório");
+
+        await prisma.refreshToken.deleteMany({where: {idUsuario: BigInt(idUsuario)}});
+    }
+
+    async generateTokensForUser(user: any, dispositivo: string = "GoogleAuth") {
         // Gera o access token curto
         const accessToken = jwt.sign(
             {userId: user.id, email: user.email},
@@ -38,7 +80,7 @@ export class AuthService {
             where: {
                 idUsuario_dispositivo: {
                     idUsuario: user.id,
-                    dispositivo: dispositivo || "Desconhecido",
+                    dispositivo: dispositivo,
                 },
             },
             update: {
@@ -49,7 +91,7 @@ export class AuthService {
                 idUsuario: user.id,
                 token: refreshToken,
                 expiresAt: refreshTokenExpiresAt,
-                dispositivo: dispositivo || "Desconhecido",
+                dispositivo: dispositivo,
             },
         });
 
@@ -59,35 +101,6 @@ export class AuthService {
             user,
             expiresIn: jwtConfig.expiresIn
         };
-    }
-
-    async refresh(refreshToken: string) {
-        const stored = await prisma.refreshToken.findUnique({
-            where: {token: refreshToken},
-            include: {usuario: true}, // pega o usuário junto
-        });
-        if (!stored || stored.expiresAt < new Date()) {
-            throw new Error("Refresh token inválido ou expirado");
-        }
-
-        const newAccessToken = jwt.sign(
-            {userId: stored.idUsuario},
-            jwtConfig.secret,
-            {expiresIn: jwtConfig.expiresIn}
-        );
-
-        return {
-            accessToken: newAccessToken,
-            user: stored.usuario,          // <<< retorna o usuário junto
-            expiresIn: jwtConfig.expiresIn,
-
-        };
-    }
-
-    async logout(idUsuario: string) {
-        if (!idUsuario) throw new Error("ID do usuário é obrigatório");
-
-        await prisma.refreshToken.deleteMany({where: {idUsuario: BigInt(idUsuario)}});
     }
 
     async forgotPassword(email: string) {

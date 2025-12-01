@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import { container } from "tsyringe";
 import { authMiddleware } from "../../middlewares/authMiddleware";
+import passport from "../../config/passport";
 
 const router = Router();
 const authController = container.resolve(AuthController);
@@ -178,5 +179,40 @@ router.post("/reset-password", authController.resetPassword);
  *         description: Token inválido ou expirado.
  */
 router.post("/validate-reset-token", authController.validateResetToken);
+
+/**
+ * @swagger
+ * /api/auth/google:
+ *   get:
+ *     summary: Inicia autenticação com Google
+ *     description: Redireciona o usuário para o Google para autenticação.
+ *     tags: [Auth]
+ *     responses:
+ *       302:
+ *         description: Redirecionamento para o Google.
+ */
+router.get(
+    '/google',
+    passport.authenticate('google', { scope: ['profile', 'email'], session: false })
+);
+
+/**
+ * @swagger
+ * /api/auth/google/callback:
+ *   get:
+ *     summary: Callback de autenticação com Google
+ *     description: Endpoint para onde o Google redireciona após a autenticação.
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Autenticação bem-sucedida.
+ *       401:
+ *         description: Falha na autenticação com Google.
+ */
+router.get(
+    '/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login', session: false }),
+    authController.googleCallback
+);
 
 export default router;
