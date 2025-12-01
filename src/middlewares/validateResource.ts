@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { AnyZodObject, ZodError } from "zod";
+import {ZodObject, ZodError } from "zod";
 
-export const validateResource = (schema: AnyZodObject) => async (req: Request, res: Response, next: NextFunction) => {
+export const validateResource = (schema: ZodObject) => async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Valida body, query e params de uma vez só
     await schema.parseAsync({
@@ -16,7 +16,7 @@ export const validateResource = (schema: AnyZodObject) => async (req: Request, r
       return res.status(400).json({
         status: "error",
         message: "Erro de validação",
-        errors: error.errors.map((err) => ({
+        errors: error.issues.map((err) => ({
           field: err.path.join("."), // Ex: "body.email"
           message: err.message,      // Ex: "E-mail inválido"
         })),
