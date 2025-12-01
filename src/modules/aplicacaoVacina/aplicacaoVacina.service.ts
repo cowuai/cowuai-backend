@@ -3,15 +3,19 @@ import {Animal, FrequenciaVacina, TipoVacina, VacinaAplicada} from "@prisma/clie
 import {injectable} from "tsyringe";
 import {animalRepository} from "../animal/animal.repository";
 import {tipoVacinaRepository} from "../tipoVacina/tipoVacina.repository";
+import {createAplicacaoVacinaSchema, updateAplicacaoVacinaSchema} from "./aplicacaoVacina.zodScheme";
+import {ApiError} from "../../types/ApiError";
 
 @injectable()
 export class AplicacaoVacinaService {
     create = async (data: Omit<VacinaAplicada, "id" | "dataCadastro" | "dataAtualizacao">) => {
         const animal = await animalRepository.findById(data.idAnimal);
-        if (!animal) throw new Error("Animal não encontrado");
+        if (!animal) throw new ApiError(404, "Animal não encontrado");
 
         const tipoVacina = await tipoVacinaRepository.findById(data.idTipoVacina);
-        if (!tipoVacina) throw new Error("Tipo de vacina não encontrado");
+        if (!tipoVacina) throw new ApiError(404, "Tipo de vacina não encontrado");
+
+        createAplicacaoVacinaSchema.parse(data);
 
         await this.validate(tipoVacina, animal, data.dataAplicacao);
 
@@ -25,12 +29,11 @@ export class AplicacaoVacinaService {
             return n > max ? n : max;
         }, 0);
 
-        // se no futuro voltar a existir "UNICA" no enum, garante dose = 1
         const isDoseUnica =
-            // comparação por string para não depender do enum existir no tipo
-            String((tipoVacina.frequencia as unknown) ?? "") === "UNICA" ||
+            // comparação por ‘string’ para não depender do enum existir no tipo
+            String((tipoVacina.frequencia as unknown) ?? "") === "DOSE_UNICA" ||
             // fallback defensivo (se o enum existir de fato)
-            (FrequenciaVacina as any)?.UNICA === tipoVacina.frequencia;
+            (FrequenciaVacina as any)?.DOSE_UNICA === tipoVacina.frequencia;
 
         const numeroDose = isDoseUnica ? 1 : lastNumber + 1;
 
@@ -58,15 +61,15 @@ export class AplicacaoVacinaService {
             (String(tipoVacina.generoAlvo) !== "TODOS") &&
             tipoVacina.generoAlvo !== animal.sexo
         ) {
-            throw new Error(`Vacina ${tipoVacina.nome} não pode ser aplicada em animais do gênero ${animal.sexo}`);
+            throw new ApiError(406, `Vacina ${tipoVacina.nome} não pode ser aplicada em animais do gênero ${animal.sexo}`);
         }
 
         if (tipoVacina.minIdadeMeses && (ageMonths === null || ageMonths < tipoVacina.minIdadeMeses)) {
-            throw new Error(`Vacina ${tipoVacina.nome} requer idade mínima de ${tipoVacina.minIdadeMeses} meses`);
+            throw new ApiError(406,`Vacina ${tipoVacina.nome} requer idade mínima de ${tipoVacina.minIdadeMeses} meses`);
         }
 
         if (tipoVacina.maxIdadeMeses && (ageMonths === null || ageMonths > tipoVacina.maxIdadeMeses)) {
-            throw new Error(`Vacina ${tipoVacina.nome} requer idade máxima de ${tipoVacina.maxIdadeMeses} meses`);
+            throw new ApiError(406,`Vacina ${tipoVacina.nome} requer idade máxima de ${tipoVacina.maxIdadeMeses} meses`);
         }
 
         if (tipoVacina.frequencia === FrequenciaVacina.ANUAL) {
@@ -81,7 +84,7 @@ export class AplicacaoVacinaService {
                 const nextDueDate = new Date(lastApplication.dataAplicacao);
                 nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
                 if (dataAplicacao < nextDueDate) {
-                    throw new Error(
+                    throw new ApiError(406,
                         `Vacina ${tipoVacina.nome} já foi aplicada em ${lastApplication.dataAplicacao.toLocaleDateString()}. ` +
                         `Próxima aplicação só pode ser feita após ${nextDueDate.toLocaleDateString()}`
                     );
@@ -98,7 +101,7 @@ export class AplicacaoVacinaService {
     findById = async (id: bigint) => {
         const aplicacao = await aplicacaoVacinaRepository.findById(id);
         if (!aplicacao) {
-            throw new Error("Aplicação de vacina não encontrada");
+            throw new ApiError(404, "Aplicação de vacina não encontrada");
         }
         return aplicacao;
     }
@@ -106,23 +109,26 @@ export class AplicacaoVacinaService {
     findByIdAnimal = async (idAnimal: bigint) => {
         const aplicacoes = await aplicacaoVacinaRepository.findByIdAnimal(idAnimal);
         if (!aplicacoes || aplicacoes.length === 0) {
-            throw new Error("Nenhuma aplicação de vacina encontrada para este animal");
+            throw new ApiError(404, "Nenhuma aplicação de vacina encontrada para este animal");
         }
         return aplicacoes;
     }
 
     update = async (id: bigint, data: Partial<VacinaAplicada>) => {
         const existingAplicacao = await aplicacaoVacinaRepository.findById(id);
-        if (!existingAplicacao) throw new Error("Aplicação de vacina não encontrada");
+        if (!existingAplicacao) throw new ApiError(404, "Aplicação de vacina não encontrada");
 
         if (data.idAnimal && data.idAnimal !== existingAplicacao.idAnimal) {
             const animal = await animalRepository.findById(data.idAnimal);
-            if (!animal) throw new Error("Animal não encontrado");
+            if (!animal) throw new ApiError(404, "Animal não encontrado");
         }
+
         if (data.idTipoVacina && data.idTipoVacina !== existingAplicacao.idTipoVacina) {
             const tipoVacina = await tipoVacinaRepository.findById(data.idTipoVacina);
-            if (!tipoVacina) throw new Error("Tipo de vacina não encontrado");
+            if (!tipoVacina) throw new ApiError(404, "Tipo de vacina não encontrado");
         }
+
+        updateAplicacaoVacinaSchema.parse(data);
 
         // por padrão, não recalculo numeroDose no update para não reescrever histórico.
         // (se quiser, dá pra recalcular aqui quando trocar idAnimal/idTipoVacina)
@@ -133,7 +139,7 @@ export class AplicacaoVacinaService {
     delete = async (id: bigint) => {
         const existingAplicacao = await aplicacaoVacinaRepository.findById(id);
         if (!existingAplicacao) {
-            throw new Error("Aplicação de vacina não encontrada");
+            throw new ApiError(404, "Aplicação de vacina não encontrada");
         }
         return aplicacaoVacinaRepository.delete(id);
     }
