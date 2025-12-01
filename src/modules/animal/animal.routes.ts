@@ -6,7 +6,7 @@ import {
   createAnimalSchema,
   updateAnimalSchema,
   getAnimalByIdSchema,
-} from "../../schemas/animal.schema"; // <--- Importante
+} from "./animal.schema"; // <--- Importante
 import { container } from "tsyringe";
 
 const router = Router();
