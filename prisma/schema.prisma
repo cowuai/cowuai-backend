@@ -49,7 +49,7 @@ model Fazenda {
   estado          String   @db.VarChar(50)
   pais            String   @db.VarChar(50)
   porte           Porte
-  afixo           String   @unique @db.VarChar(255)
+  afixo           String   @db.VarChar(255)
   prefixo         Boolean  @db.UnsignedTinyInt
   sufixo          Boolean  @db.UnsignedTinyInt
   dataCadastro    DateTime @default(now()) @map("data_cadastro")
@@ -87,7 +87,7 @@ model Animal {
   idProprietario BigInt?
 
   vacinacoes VacinaAplicada[]
-  doencas         DoencaAnimal[]
+  doencas    DoencaAnimal[]
 
   @@map("animal")
 }
@@ -148,33 +148,30 @@ model Doenca {
   dataCadastro    DateTime @default(now()) @map("data_cadastro")
   dataAtualizacao DateTime @updatedAt @map("data_atualizacao")
 
-  doencasAnimal   DoencaAnimal[]
+  doencasAnimal DoencaAnimal[]
 
   @@map("doenca")
 }
 
-
 model DoencaAnimal {
-  id                   BigInt   @id @default(autoincrement()) @db.BigInt
-  idAnimal             BigInt   @map("id_animal") @db.BigInt
-  idDoenca             BigInt   @map("id_doenca") @db.BigInt
-  dataDiagnostico      DateTime @map("data_diagnostico")
-  emTratamento         Boolean  @default(true) @map("em_tratamento")
+  id                   BigInt    @id @default(autoincrement()) @db.BigInt
+  idAnimal             BigInt    @map("id_animal") @db.BigInt
+  idDoenca             BigInt    @map("id_doenca") @db.BigInt
+  dataDiagnostico      DateTime  @map("data_diagnostico")
+  emTratamento         Boolean   @default(true) @map("em_tratamento")
   dataInicioTratamento DateTime? @map("data_inicio_tratamento")
   dataFimTratamento    DateTime? @map("data_fim_tratamento")
-  observacoes          String?  @db.VarChar(2000)
-  dataCadastro         DateTime @default(now()) @map("data_cadastro")
-  dataAtualizacao      DateTime @updatedAt @map("data_atualizacao")
+  observacoes          String?   @db.VarChar(2000)
+  dataCadastro         DateTime  @default(now()) @map("data_cadastro")
+  dataAtualizacao      DateTime  @updatedAt @map("data_atualizacao")
 
-  animal               Animal   @relation(fields: [idAnimal], references: [id])
-  doenca               Doenca   @relation(fields: [idDoenca], references: [id])
+  animal Animal @relation(fields: [idAnimal], references: [id])
+  doenca Doenca @relation(fields: [idDoenca], references: [id])
 
   @@index([idAnimal])
   @@index([idDoenca])
-
   @@map("doenca_animal")
 }
-
 
 // ==========================
 // Enums
