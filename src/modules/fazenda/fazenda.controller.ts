@@ -1,12 +1,81 @@
-import {FazendaService} from "./fazenda.service";
-import {Request, Response, NextFunction} from "express";
-import {errorHandler} from "../../middlewares/errorHandler";
-import {inject, injectable} from "tsyringe";
+import { FazendaService } from "./fazenda.service";
+import { Request, Response } from "express";
+import { errorHandler } from "../../middlewares/errorHandler";
+import { inject, injectable } from "tsyringe";
+import { z } from "zod";
+
+// 📌 Schema para criar Fazenda (body)
+const createFazendaSchema = z.object({
+    nome: z
+        .string()
+        .min(1, "Nome da fazenda é obrigatório")
+        .max(255, "Nome muito longo (máx. 255 caracteres)"),
+    endereco: z
+        .string()
+        .min(1, "Endereço é obrigatório")
+        .max(255, "Endereço muito longo (máx. 255 caracteres)"),
+    cidade: z
+        .string()
+        .min(1, "Cidade é obrigatória")
+        .max(255, "Cidade muito longa (máx. 255 caracteres)"),
+    estado: z
+        .string()
+        .length(2, "Estado deve ser a sigla (ex: MG, SP)"),
+    pais: z
+        .string()
+        .min(1, "País é obrigatório")
+        .max(255, "País muito longo (máx. 255 caracteres)"),
+    porte: z.enum(
+        ["PEQUENO", "MEDIO", "GRANDE"],
+        "Porte inválido. Use PEQUENO, MEDIO ou GRANDE."
+    ),
+    afixo: z
+        .string()
+        .max(255, "Afixo muito longo (máx. 255 caracteres)")
+        .optional()
+        .or(z.literal("")), // permite string vazia
+    prefixo: z.boolean({
+        message: "Valor inválido para prefixo",
+    }),
+    sufixo: z.boolean({
+        message: "Valor inválido para sufixo",
+    }),
+}).superRefine((data, ctx) => {
+    // Regra de negócio: se prefixo ou sufixo estiver true, afixo não pode ser vazio
+    if ((data.prefixo || data.sufixo) && !(data.afixo ?? "").trim()) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["afixo"],
+            message: "Informe o texto do afixo quando marcar prefixo ou sufixo.",
+        });
+    }
+});
+
+// 📌 Schema para update (todos os campos opcionais)
+const updateFazendaSchema = createFazendaSchema.partial();
+
+// 📌 Schema genérico para params com ID numérico
+const idParamSchema = z.object({
+    id: z
+        .string()
+        .regex(/^\d+$/, "ID deve ser um número inteiro positivo"),
+});
+
+const idProprietarioParamSchema = z.object({
+    idProprietario: z
+        .string()
+        .regex(/^\d+$/, "idProprietario deve ser um número inteiro positivo"),
+});
+
+const nomeParamSchema = z.object({
+    nome: z
+        .string()
+        .min(1, "Nome é obrigatório"),
+});
 
 @injectable()
 export class FazendaController {
-    constructor(@inject(FazendaService) private fazendaService: FazendaService) {
-    }
+    constructor(@inject(FazendaService) private fazendaService: FazendaService) { }
 
     create = async (req: Request, res: Response) => {
         try {
@@ -14,56 +83,29 @@ export class FazendaController {
             const user = (req as any).user;
             const userId = user?.userId;
             if (!userId) {
-                return res.status(401).json({error: "Usuário não autenticado"});
+                return res.status(401).json({ error: "Usuário não autenticado" });
             }
 
-            // 2) pega os campos do body
-            let {
-                nome,
-                endereco,
-                cidade,
-                estado,
-                pais,
-                porte,
-                afixo,
-                prefixo,
-                sufixo,
-            } = req.body;
+            // 2) valida body com Zod
+            const data = createFazendaSchema.parse(req.body);
 
-            // 3) validação dos obrigatórios (conforme schema atual)
-            const faltando: string[] = [];
-            if (!nome) faltando.push("nome");
-            if (!endereco) faltando.push("endereco");
-            if (!cidade) faltando.push("cidade");
-            if (!estado) faltando.push("estado");
-            if (!pais) faltando.push("pais");
-            if (porte === undefined || porte === null) faltando.push("porte");
-            if (afixo === undefined || afixo === null) faltando.push("afixo");
-            if (prefixo === undefined || prefixo === null) faltando.push("prefixo");
-            if (sufixo === undefined || sufixo === null) faltando.push("sufixo");
-
-            if (faltando.length) {
-                return res.status(400).json({error: `Campos obrigatórios: ${faltando.join(", ")}`});
-            }
-
-            // 4) chama o service passando idProprietario a partir do token
+            // 3) chama o service passando idProprietario a partir do token
             const newFazenda = await this.fazendaService.create({
                 idProprietario: BigInt(userId),
-                nome,
-                endereco,
-                cidade,
-                estado,
-                pais,
-                porte,    // valores aceitos: "PEQUENO" | "MEDIO" | "GRANDE"
-                afixo,    // string
-                prefixo,  // boolean
-                sufixo,   // boolean
+                ...data,
             } as any);
 
-            res.status(201).json(newFazenda);
-        } catch (error) {
-            errorHandler(error as Error, req, res, () => {
-            });
+            return res.status(201).json(newFazenda);
+        } catch (err: any) {
+            if (err instanceof z.ZodError) {
+                return res.status(400).json({
+                    error: "Dados inválidos para cadastro de fazenda",
+                    issues: err.issues,
+                });
+            }
+
+            // mantém o padrão atual usando o errorHandler
+            errorHandler(err as Error, req, res, () => { });
         }
     };
 
@@ -79,57 +121,85 @@ export class FazendaController {
 
     findById = async (req: Request, res: Response) => {
         try {
-            const {id} = req.params;
+            const { id } = idParamSchema.parse(req.params);
             const fazenda = await this.fazendaService.findById(BigInt(id));
-            res.status(200).json(fazenda);
-        } catch (error) {
-            errorHandler(error as Error, req, res, () => {
-            });
+            return res.status(200).json(fazenda);
+        } catch (err: any) {
+            if (err instanceof z.ZodError) {
+                return res.status(400).json({
+                    error: "Parâmetros inválidos",
+                    issues: err.issues,
+                });
+            }
+            errorHandler(err as Error, req, res, () => { });
         }
-    }
+    };
 
     findByNome = async (req: Request, res: Response) => {
         try {
-            const {nome} = req.params;
+            const { nome } = nomeParamSchema.parse(req.params);
             const fazenda = await this.fazendaService.findByNome(nome);
-            res.status(200).json(fazenda);
-        } catch (error) {
-            errorHandler(error as Error, req, res, () => {
-            });
+            return res.status(200).json(fazenda);
+        } catch (err: any) {
+            if (err instanceof z.ZodError) {
+                return res.status(400).json({
+                    error: "Parâmetros inválidos",
+                    issues: err.issues,
+                });
+            }
+            errorHandler(err as Error, req, res, () => { });
         }
-    }
+    };
 
     findByIdProprietario = async (req: Request, res: Response) => {
         try {
-            const {idProprietario} = req.params;
-            const fazendas = await this.fazendaService.findByIdProprietario(BigInt(idProprietario));
-            res.status(200).json(fazendas);
-        } catch (error) {
-            errorHandler(error as Error, req, res, () => {
-            });
+            const { idProprietario } = idProprietarioParamSchema.parse(req.params);
+            const fazendas = await this.fazendaService.findByIdProprietario(
+                BigInt(idProprietario)
+            );
+            return res.status(200).json(fazendas);
+        } catch (err: any) {
+            if (err instanceof z.ZodError) {
+                return res.status(400).json({
+                    error: "Parâmetros inválidos",
+                    issues: err.issues,
+                });
+            }
+            errorHandler(err as Error, req, res, () => { });
         }
-    }
+    };
 
     update = async (req: Request, res: Response) => {
         try {
-            const {id} = req.params;
-            const data = req.body;
+            const { id } = idParamSchema.parse(req.params);
+            const data = updateFazendaSchema.parse(req.body);
+
             const updatedFazenda = await this.fazendaService.update(BigInt(id), data);
-            res.status(200).json(updatedFazenda);
-        } catch (error) {
-            errorHandler(error as Error, req, res, () => {
-            });
+            return res.status(200).json(updatedFazenda);
+        } catch (err: any) {
+            if (err instanceof z.ZodError) {
+                return res.status(400).json({
+                    error: "Dados inválidos para atualização de fazenda",
+                    issues: err.issues,
+                });
+            }
+            errorHandler(err as Error, req, res, () => { });
         }
-    }
+    };
 
     delete = async (req: Request, res: Response) => {
         try {
-            const {id} = req.params;
+            const { id } = idParamSchema.parse(req.params);
             await this.fazendaService.delete(BigInt(id));
-            res.status(204).send("Fazenda deletada com sucesso");
-        } catch (error) {
-            errorHandler(error as Error, req, res, () => {
-            });
+            return res.status(204).send("Fazenda deletada com sucesso");
+        } catch (err: any) {
+            if (err instanceof z.ZodError) {
+                return res.status(400).json({
+                    error: "Parâmetros inválidos",
+                    issues: err.issues,
+                });
+            }
+            errorHandler(err as Error, req, res, () => { });
         }
-    }
+    };
 }

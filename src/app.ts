@@ -3,13 +3,15 @@ import express from "express";
 import fazendaRoutes from "./modules/fazenda/fazenda.routes";
 import animalRoutes from "./modules/animal/animal.routes";
 import authRoutes from "./modules/auth/auth.routes";
-import tipoVacinaRoutes from "./modules/vacina/tipoVacina.routes";
-import aplicacaoVacinaRoutes from "./modules/vacina/aplicacaoVacina.routes";
+import tipoVacinaRoutes from "./modules/tipoVacina/tipoVacina.routes";
+import aplicacaoVacinaRoutes from "./modules/aplicacaoVacina/aplicacaoVacina.routes";
 import tipoRacaRoutes from "./modules/tipoRaca/tipoRaca.routes";
 import usuarioRoutes from "./modules/usuario/usuario.routes";
 import cadastroRoutes from "./modules/cadastro/cadastro.route";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes";
 import perfilRoutes from "./modules/perfil/perfil.route";
+import doencaRoutes from "./modules/doenca/doenca.routes";
+import doencaAnimalRoutes from "./modules/doencaAnimal/doencaAnimal.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { prisma } from "./config/prisma";
 import cors from "cors";
@@ -56,6 +58,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/tipos-raca", tipoRacaRoutes);
 app.use("/api/tipos-vacina", tipoVacinaRoutes);
 app.use("/api/aplicacoes-vacina", aplicacaoVacinaRoutes);
+app.use("/api/doencas", doencaRoutes);
+app.use("/api/doencas-animal", doencaAnimalRoutes);
 
 // ROTA DA DOCUMENTAÇÃO DO SWAGGER (Adicionada aqui)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
