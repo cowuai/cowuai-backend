@@ -1,8 +1,8 @@
 import {prisma} from "../../config/prisma";
-import {Prisma, Usuario} from "@prisma/client";
+import {Prisma} from "@prisma/client";
 
 export const usuarioRepository = {
-    create: (data: Omit<Usuario, "id" | "dataCadastro" | "dataAtualizacao">) => {
+    create: (data: Prisma.UsuarioCreateInput) => {
         return prisma.usuario.create({data: data});
     },
     findByCpf: (cpf: string) => {
@@ -27,5 +27,9 @@ export const usuarioRepository = {
 
     findByResetToken: (token: string) => {
         return prisma.usuario.findFirst({where: {resetPasswordToken: token}});
+    },
+
+    findByGoogleId: (googleId: string) => {
+        return prisma.usuario.findUnique({where: {googleId}});
     }
 }

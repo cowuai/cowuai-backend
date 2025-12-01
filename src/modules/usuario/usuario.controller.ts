@@ -111,7 +111,6 @@ export class UsuarioController {
         @inject(AuthService) private authService: AuthService
     ) {}
 
-    // CREATE
     create = async (req: Request, res: Response) => {
         try {
             const data = createUsuarioSchema.parse(req.body);
@@ -124,6 +123,7 @@ export class UsuarioController {
                 nome: data.nome,
                 email: data.email,
                 senha: hashedPassword,
+                googleId: null,
                 dataNascimento: data.dataNascimento ? new Date(data.dataNascimento) : null,
                 ativo: data.ativo ?? true,
                 telefone: data.telefone ?? "",
@@ -149,7 +149,6 @@ export class UsuarioController {
         }
     };
 
-    // READ – todos
     findAll = async (_req: Request, res: Response) => {
         try {
             const usuarios = await this.usuarioService.findAll();
@@ -159,7 +158,6 @@ export class UsuarioController {
         }
     };
 
-    // READ – por id
     findById = async (req: Request, res: Response) => {
         try {
             const { id } = idParamSchema.parse(req.params);
@@ -173,7 +171,6 @@ export class UsuarioController {
         }
     };
 
-    // READ – por nome
     findByNome = async (req: Request, res: Response) => {
         try {
             const { nome } = nomeParamSchema.parse(req.params);
@@ -187,7 +184,6 @@ export class UsuarioController {
         }
     };
 
-    // READ – por CPF
     findByCpf = async (req: Request, res: Response) => {
         try {
             const { cpf } = cpfParamSchema.parse(req.params);
@@ -201,7 +197,6 @@ export class UsuarioController {
         }
     };
 
-    // READ – por Email
     findByEmail = async (req: Request, res: Response) => {
         try {
             const { email } = emailParamSchema.parse(req.params);
