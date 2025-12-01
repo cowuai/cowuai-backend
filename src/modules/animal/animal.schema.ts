@@ -11,12 +11,12 @@ const TipoRacaEnum = z.enum([
 ]);
 
 // Helper para validar IDs que são BigInt no banco (aceita number ou string numérica)
-const idSchema = z.coerce.number({ invalid_type_error: "ID deve ser um número válido" })
+const idSchema = z.coerce.number( "ID deve ser um número válido" )
   .int().positive("ID deve ser um número positivo");
 
 export const createAnimalSchema = z.object({
   body: z.object({
-    nome: z.string({ required_error: "O nome é obrigatório" }).min(1),
+    nome: z.string("O nome é obrigatório").min(1),
     
     tipoRaca: TipoRacaEnum,
     
