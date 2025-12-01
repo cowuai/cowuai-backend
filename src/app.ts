@@ -19,7 +19,7 @@ import doencaAnimalRoutes from "./modules/doencaAnimal/doencaAnimal.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { prisma } from "./config/prisma";
 import cors from "cors";
-import "./shared/container"; // Importa as configurações do container de injeção de dependências
+import "./shared/container";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./config/swaggerConfig";
@@ -63,6 +63,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/tipos-raca", tipoRacaRoutes);
 app.use("/api/tipos-vacina", tipoVacinaRoutes);
 app.use("/api/aplicacoes-vacina", aplicacaoVacinaRoutes);
+app.use("/api/doencas", doencaRoutes);
+app.use("/api/doencas-animal", doencaAnimalRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Middleware de tratamento de erros
