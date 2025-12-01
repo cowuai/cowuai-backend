@@ -37,6 +37,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tsyringe": "^4.10.0",
+    "zod": "^4.1.13",
     "uuid": "^13.0.0"
   },
   "name": "cowuai-backend",
