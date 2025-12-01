@@ -1,6 +1,7 @@
 import { injectable } from "tsyringe";
 import { tipoVacinaRepository } from "./tipoVacina.repository";
 import { TipoVacina } from "@prisma/client";
+import {createTipoVacinaSchema, updateTipoVacinaSchema} from "./tipoVacina.zodScheme";
 
 @injectable()
 export class TipoVacinaService {
@@ -9,6 +10,9 @@ export class TipoVacinaService {
         if (existingTipoVacina) {
             throw new Error("Tipo de vacina com esse nome já existe");
         }
+
+        createTipoVacinaSchema.parse(data);
+
         return tipoVacinaRepository.create(data);
     }
 
@@ -21,6 +25,7 @@ export class TipoVacinaService {
         if (!tipoVacina) {
             throw new Error("Tipo de vacina não encontrado");
         }
+
         return tipoVacina;
     }
 
@@ -29,6 +34,7 @@ export class TipoVacinaService {
         if (!tipoVacina) {
             throw new Error("Tipo de vacina não encontrado");
         }
+
         return tipoVacina;
     }
 
@@ -37,12 +43,16 @@ export class TipoVacinaService {
         if (!existingTipoVacina) {
             throw new Error("Tipo de vacina não encontrado");
         }
+
         if (data.nome && data.nome !== existingTipoVacina.nome) {
             const tipoVacinaWithSameName = await tipoVacinaRepository.findByNome(data.nome);
             if (tipoVacinaWithSameName) {
                 throw new Error("Outro tipo de vacina com esse nome já existe");
             }
         }
+
+        updateTipoVacinaSchema.parse(data);
+
         return tipoVacinaRepository.update(id, data);
     }
 
@@ -51,6 +61,7 @@ export class TipoVacinaService {
         if (!existingTipoVacina) {
             throw new Error("Tipo de vacina não encontrado");
         }
+
         return tipoVacinaRepository.delete(id);
     }
 }

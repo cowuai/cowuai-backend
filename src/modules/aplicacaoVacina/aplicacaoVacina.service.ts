@@ -3,6 +3,7 @@ import {Animal, FrequenciaVacina, TipoVacina, VacinaAplicada} from "@prisma/clie
 import {injectable} from "tsyringe";
 import {animalRepository} from "../animal/animal.repository";
 import {tipoVacinaRepository} from "../tipoVacina/tipoVacina.repository";
+import {createAplicacaoVacinaSchema, updateAplicacaoVacinaSchema} from "./aplicacaoVacina.zodScheme";
 
 @injectable()
 export class AplicacaoVacinaService {
@@ -12,6 +13,8 @@ export class AplicacaoVacinaService {
 
         const tipoVacina = await tipoVacinaRepository.findById(data.idTipoVacina);
         if (!tipoVacina) throw new Error("Tipo de vacina não encontrado");
+
+        createAplicacaoVacinaSchema.parse(data);
 
         await this.validate(tipoVacina, animal, data.dataAplicacao);
 
@@ -25,12 +28,11 @@ export class AplicacaoVacinaService {
             return n > max ? n : max;
         }, 0);
 
-        // se no futuro voltar a existir "UNICA" no enum, garante dose = 1
         const isDoseUnica =
-            // comparação por string para não depender do enum existir no tipo
-            String((tipoVacina.frequencia as unknown) ?? "") === "UNICA" ||
+            // comparação por ‘string’ para não depender do enum existir no tipo
+            String((tipoVacina.frequencia as unknown) ?? "") === "DOSE_UNICA" ||
             // fallback defensivo (se o enum existir de fato)
-            (FrequenciaVacina as any)?.UNICA === tipoVacina.frequencia;
+            (FrequenciaVacina as any)?.DOSE_UNICA === tipoVacina.frequencia;
 
         const numeroDose = isDoseUnica ? 1 : lastNumber + 1;
 
@@ -119,10 +121,13 @@ export class AplicacaoVacinaService {
             const animal = await animalRepository.findById(data.idAnimal);
             if (!animal) throw new Error("Animal não encontrado");
         }
+
         if (data.idTipoVacina && data.idTipoVacina !== existingAplicacao.idTipoVacina) {
             const tipoVacina = await tipoVacinaRepository.findById(data.idTipoVacina);
             if (!tipoVacina) throw new Error("Tipo de vacina não encontrado");
         }
+
+        updateAplicacaoVacinaSchema.parse(data);
 
         // por padrão, não recalculo numeroDose no update para não reescrever histórico.
         // (se quiser, dá pra recalcular aqui quando trocar idAnimal/idTipoVacina)
