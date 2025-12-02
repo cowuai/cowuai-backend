@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { errorHandler } from "../../middlewares/errorHandler";
 import { UsuarioService } from "./usuario.service";
 import bcrypt from "bcrypt";
@@ -111,7 +111,7 @@ export class UsuarioController {
         @inject(AuthService) private authService: AuthService
     ) {}
 
-    create = async (req: Request, res: Response) => {
+    create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const data = createUsuarioSchema.parse(req.body);
 
@@ -138,79 +138,61 @@ export class UsuarioController {
             const loggedUserWithToken = await this.authService.login(data.email, plainSenha);
 
             res.status(201).json(loggedUserWithToken);
-        } catch (err: any) {
-            if (err instanceof z.ZodError)
-                return res.status(400).json({
-                    error: "Dados inválidos para cadastro de usuário",
-                    issues: err.issues,
-                });
-
-            errorHandler(err as Error, req, res, () => {});
+        } catch (error) {
+            next(error);
         }
     };
 
-    findAll = async (_req: Request, res: Response) => {
+    findAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const usuarios = await this.usuarioService.findAll();
             res.status(200).json(usuarios);
         } catch (error) {
-            errorHandler(error as Error, _req, res, () => {});
+            next(error);
         }
     };
 
-    findById = async (req: Request, res: Response) => {
+    findById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = idParamSchema.parse(req.params);
             const usuario = await this.usuarioService.findById(BigInt(id));
             res.status(200).json(usuario);
-        } catch (err: any) {
-            if (err instanceof z.ZodError)
-                return res.status(400).json({ error: "Parâmetros inválidos", issues: err.issues });
-
-            errorHandler(err as Error, req, res, () => {});
+        } catch (error) {
+            next(error);
         }
     };
 
-    findByNome = async (req: Request, res: Response) => {
+    findByNome = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { nome } = nomeParamSchema.parse(req.params);
             const usuarios = await this.usuarioService.findByNome(nome);
             res.status(200).json(usuarios);
-        } catch (err: any) {
-            if (err instanceof z.ZodError)
-                return res.status(400).json({ error: "Parâmetros inválidos", issues: err.issues });
-
-            errorHandler(err as Error, req, res, () => {});
+        } catch (error) {
+            next(error);
         }
     };
 
-    findByCpf = async (req: Request, res: Response) => {
+    findByCpf = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { cpf } = cpfParamSchema.parse(req.params);
             const usuario = await this.usuarioService.findByCpf(cpf);
             res.status(200).json(usuario);
-        } catch (err: any) {
-            if (err instanceof z.ZodError)
-                return res.status(400).json({ error: "Parâmetros inválidos", issues: err.issues });
-
-            errorHandler(err as Error, req, res, () => {});
+        } catch (error) {
+            next(error);
         }
     };
 
-    findByEmail = async (req: Request, res: Response) => {
+    findByEmail = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { email } = emailParamSchema.parse(req.params);
             const usuario = await this.usuarioService.findByEmail(email);
             res.status(200).json(usuario);
-        } catch (err: any) {
-            if (err instanceof z.ZodError)
-                return res.status(400).json({ error: "Parâmetros inválidos", issues: err.issues });
-
-            errorHandler(err as Error, req, res, () => {});
+        } catch (error) {
+            next(error);
         }
     };
 
-    update = async (req: Request, res: Response) => {
+    update = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = idParamSchema.parse(req.params);
             const data = updateUsuarioSchema.parse(req.body);
@@ -233,27 +215,18 @@ export class UsuarioController {
 
             const atualizado = await this.usuarioService.update(BigInt(id), payload);
             res.status(200).json(atualizado);
-        } catch (err: any) {
-            if (err instanceof z.ZodError)
-                return res.status(400).json({
-                    error: "Dados inválidos para atualização de usuário",
-                    issues: err.issues,
-                });
-
-            errorHandler(err as Error, req, res, () => {});
+        } catch (error) {
+            next(error);
         }
     };
 
-    delete = async (req: Request, res: Response) => {
+    delete = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = idParamSchema.parse(req.params);
             await this.usuarioService.delete(BigInt(id));
             res.status(204).send("Usuário deletado com sucesso");
-        } catch (err: any) {
-            if (err instanceof z.ZodError)
-                return res.status(400).json({ error: "Parâmetros inválidos", issues: err.issues });
-
-            errorHandler(err as Error, req, res, () => {});
+        } catch (error) {
+            next(error);
         }
     };
 }

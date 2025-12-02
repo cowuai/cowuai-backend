@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import {Router} from "express";
+import {Request, Response, NextFunction, Router} from "express";
 import {container} from "tsyringe";
 import {UsuarioService} from "../usuario/usuario.service";
 import {FazendaService} from "../fazenda/fazenda.service";
@@ -105,7 +105,7 @@ const authService = container.resolve(AuthService);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {cpf, nome, email, senha, dataNascimento, telefone, localizacao, urlImagem, fazenda} = req.body;
 
@@ -144,12 +144,8 @@ router.post("/", async (req, res) => {
             message: "Cadastro realizado com sucesso!",
             ...loginPayload
         });
-    } catch (err: any) {
-        if (err.message.includes("Unique constraint failed")) {
-            return res.status(409).json({message: "Email ou CPF já cadastrado."});
-        }
-        console.error("Erro no cadastro unificado:", err);
-        return res.status(500).json({message: err.message || "Erro interno no servidor."});
+    } catch (error) {
+        next(error);
     }
 });
 

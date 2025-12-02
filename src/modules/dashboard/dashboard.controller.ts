@@ -1,7 +1,7 @@
-import {Request, Response} from "express";
+import {Request, Response, NextFunction} from "express";
 import {prisma} from "../../config/prisma";
 
-export const getDashboardData = async (req: Request, res: Response) => {
+export const getDashboardData = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {userId} = (req as any).user;
 
@@ -154,7 +154,6 @@ export const getDashboardData = async (req: Request, res: Response) => {
             totalAnimaisVendidos
         });
     } catch (error) {
-        console.error("Erro ao buscar dados do dashboard:", error);
-        res.status(500).json({message: "Erro interno do servidor"});
+        next(error);
     }
 };
