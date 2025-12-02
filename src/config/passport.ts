@@ -38,7 +38,8 @@ passport.use(
                             googleId: googleId,
                             ativo: true,
                             cpf: null,
-                            senha: null
+                            senha: null,
+                            urlImagem: profile.photos?.[0]?.value || null,
                         });
                     }
                 }
