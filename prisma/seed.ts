@@ -157,11 +157,20 @@ async function main() {
 
   const fazendasCriadas: any[] = [];
   for (const fazenda of fazendas) {
-    const f = await prisma.fazenda.upsert({
-      where: { afixo: fazenda.afixo },
-      update: fazenda,
-      create: fazenda,
+    const existing = await prisma.fazenda.findFirst({
+      where: { idProprietario: fazenda.idProprietario },
     });
+
+    let f;
+    if (existing) {
+      f = await prisma.fazenda.update({
+        where: { id: existing.id },
+        data: fazenda,
+      });
+    } else {
+      f = await prisma.fazenda.create({ data: fazenda });
+    }
+
     fazendasCriadas.push(f);
   }
   console.log("Fazendas criadas.");
