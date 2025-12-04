@@ -47,8 +47,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
-    "start": "node dist/server.js",
-    "dev": "npm run build && concurrently \"tsc -w\" \"nodemon dist/server.js\""
+    "start": "node dist/src/server.js",
+    "dev": "npm run build && concurrently \"tsc -w\" \"nodemon dist/src/server.js\""
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
