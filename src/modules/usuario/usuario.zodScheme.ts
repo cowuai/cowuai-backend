@@ -25,7 +25,7 @@ export const createUsuarioSchema = zod.object({
 
     nome: zod
         .string()
-        .min(8, "Nome muito curto")
+        .min(4, "Nome muito curto")
         .max(255, "Nome muito longo")
         .refine((v) => v.trim().split(" ").length >= 2, {
             message: "Digite nome completo (nome e sobrenome)",
@@ -51,13 +51,12 @@ export const createUsuarioSchema = zod.object({
         .refine((s) => {
             if (!s) return true;
             const birth = new Date(s);
-            const now = new Date();
-            const age =
-                now.getFullYear() -
-                birth.getFullYear() -
-                (now < new Date(now.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
-            return age >= 18;
-        }, "Usuário deve ter pelo menos 18 anos"),
+            const today = new Date();
+            const birthDateOnly = new Date(birth.getFullYear(), birth.getMonth(), birth.getDate());
+            const todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+            return birthDateOnly <= todayDateOnly;
+        }, "Data de nascimento não pode ser no futuro"),
 
     ativo: zod.boolean().optional(),
 
