@@ -108,11 +108,7 @@ export class UsuarioController {
             if (data.ativo !== undefined) payload.ativo = data.ativo;
             if (data.dataNascimento !== undefined)
                 payload.dataNascimento = data.dataNascimento ? new Date(data.dataNascimento) : null;
-
-            if (typeof data.senha === "string" && data.senha.trim()) {
-                payload.senha = await bcrypt.hash(data.senha, 10);
-            }
-
+            
             if (data.telefone !== undefined) payload.telefone = data.telefone;
             if (data.localizacao !== undefined) payload.localizacao = data.localizacao;
             if (data.urlImagem !== undefined) payload.urlImagem = data.urlImagem;

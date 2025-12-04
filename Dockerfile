@@ -52,9 +52,18 @@ COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/clie
 # Copia o .env.example
 COPY .env.example .env.example
 
+# Copia o script de entrypoint
+COPY docker-entrypoint.sh ./
+
+# Dá permissão de execução
+RUN chmod +x docker-entrypoint.sh
+
 # A porta 3333 é definida no seu .env
 ENV PORT 3333
 EXPOSE 3333
+
+# Define o Entrypoint
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # O package.json define "start": "node dist/server.js"
 CMD [ "npm", "start" ]
