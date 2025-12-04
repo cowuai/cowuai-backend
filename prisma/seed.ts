@@ -62,18 +62,7 @@ async function main() {
         },
     ];
 
-    const vacinasCriadas: {
-        id: bigint;
-        nome: string;
-        descricao: string | null;
-        obrigatoria: boolean;
-        generoAlvo: $Enums.SexoAnimal | null;
-        minIdadeMeses: number | null;
-        maxIdadeMeses: number | null;
-        frequencia: $Enums.FrequenciaVacina;
-        dataCadastro: Date;
-        dataAtualizacao: Date;
-    } [] = [];
+    const vacinasCriadas: any[] = [];
 
     for (const vacina of vacinas) {
         const v = await prisma.tipoVacina.upsert({
@@ -121,7 +110,7 @@ async function main() {
         },
     ];
 
-    const usuariosCriados = [];
+    const usuariosCriados: any[] = [];
     for (const usuario of usuarios) {
         const u = await prisma.usuario.upsert({
             where: { email: usuario.email },
@@ -160,7 +149,7 @@ async function main() {
         },
     ];
 
-    const fazendasCriadas = [];
+    const fazendasCriadas: any[] = [];
     for (const f of fazendas) {
         // Busca o ID do proprietário atualizado
         const proprietario = usuariosCriados.find((u) => u.email === f.emailProprietario);
@@ -253,23 +242,7 @@ async function main() {
         },
     ];
 
-    const animaisCriados: {
-        id: bigint;
-        nome: string;
-        dataNascimento: Date | null;
-        localizacao: string | null;
-        idProprietario: bigint;
-        numeroParticularProprietario: string | null;
-        tipoRaca: $Enums.TipoRaca;
-        sexo: $Enums.SexoAnimal;
-        composicaoRacial: string | null;
-        registro: string | null;
-        status: $Enums.StatusAnimal;
-        peso: number | null;
-        idPai: bigint | null;
-        idMae: bigint | null;
-        idFazenda: bigint;
-    }[] = [];
+    const animaisCriados: any[] = [];
 
     for (const a of animais) {
         const dadosAnimal = {
@@ -300,7 +273,7 @@ async function main() {
         { nome: "Pododermatite", descricao: "Problema de casco.", ehCronica: true },
     ];
 
-    const doencasCriadas: { id: bigint; nome: string; dataCadastro: Date; dataAtualizacao: Date; descricao: string | null; ehCronica: boolean; }[] = [];
+    const doencasCriadas: any[] = [];
     for (const doenca of doencas) {
         const d = await prisma.doenca.upsert({
             where: { nome: doenca.nome },
@@ -311,7 +284,7 @@ async function main() {
     }
     console.log("✅ Catálogo de doenças sincronizado.");
 
-    // ====== DOENÇAS DOS ANIMAIS (Lógica corrigida) ======
+    // ====== DOENÇAS DOS ANIMAIS ======
     // Helper para buscar IDs pelos nomes/códigos para ficar legível
     const getAnimalId = (num: string) => animaisCriados.find(a => a.numeroParticularProprietario === num)?.id;
     const getDoencaId = (nome: string) => doencasCriadas.find(d => d.nome === nome)?.id;
@@ -375,7 +348,7 @@ async function main() {
     }
     console.log("✅ Histórico de doenças sincronizado.");
 
-    // ====== VACINAS APLICADAS (Lógica corrigida) ======
+    // ====== VACINAS APLICADAS ======
     const getVacinaId = (nome: string) => vacinasCriadas.find(v => v.nome === nome)?.id;
 
     const aplicacoes = [
