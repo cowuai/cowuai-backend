@@ -15,7 +15,7 @@ const aplicacaoVacinaController = container.resolve(AplicacaoVacinaController);
 
 /**
  * @swagger
- * /api/aplicacoes-vacinas:
+ * /api/aplicacoes-vacina:
  *   post:
  *     summary: Registra uma nova aplicação de vacina
  *     description: Adiciona um registro de aplicação de vacina para um animal.
@@ -32,7 +32,7 @@ const aplicacaoVacinaController = container.resolve(AplicacaoVacinaController);
  *               idAnimal:
  *                 type: string
  *                 description: ID do animal que recebeu a vacina
- *               idVacina:
+ *               idTipoVacina:
  *                 type: string
  *                 description: ID da vacina aplicada
  *               dataAplicacao:
@@ -69,7 +69,7 @@ router.post(
 
 /**
  * @swagger
- * /api/aplicacoes-vacinas:
+ * /api/aplicacoes-vacina:
  *   get:
  *     summary: Lista todas as aplicações de vacinas
  *     description: Retorna uma lista de todas as aplicações de vacinas registradas (requer autenticação).
@@ -90,7 +90,7 @@ router.get(
 
 /**
  * @swagger
- * /api/aplicacoes-vacinas/id/{id}:
+ * /api/aplicacoes-vacina/id/{id}:
  *   get:
  *     summary: Busca aplicação de vacina por ID
  *     description: Retorna os detalhes de uma aplicação de vacina específica pelo seu ID.
@@ -120,7 +120,7 @@ router.get(
 
 /**
  * @swagger
- * /api/aplicacoes-vacinas/animal/{idAnimal}:
+ * /api/aplicacoes-vacina/animal/{idAnimal}:
  *   get:
  *     summary: Lista aplicações de vacinas por ID do animal
  *     description: Retorna todas as aplicações de vacinas associadas a um animal específico.
@@ -150,7 +150,7 @@ router.get(
 
 /**
  * @swagger
- * /api/aplicacoes-vacinas/{id}:
+ * /api/aplicacoes-vacina/{id}:
  *   put:
  *     summary: Atualiza uma aplicação de vacina existente
  *     description: Atualiza os detalhes de uma aplicação de vacina específica pelo seu ID.
@@ -205,7 +205,7 @@ router.put(
 
 /**
  * @swagger
- * /api/aplicacoes-vacinas/{id}:
+ * /api/aplicacoes-vacina/{id}:
  *   delete:
  *     summary: Remove uma aplicação de vacina
  *     description: Exclui uma aplicação de vacina específica pelo seu ID.

@@ -1,7 +1,7 @@
-import {Request, Response} from "express";
+import {Request, Response, NextFunction} from "express";
 import {prisma} from "../../config/prisma";
 
-export const getDashboardData = async (req: Request, res: Response) => {
+export const getDashboardData = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {userId} = (req as any).user;
 
@@ -136,7 +136,43 @@ export const getDashboardData = async (req: Request, res: Response) => {
             where: {idProprietario: BigInt(userId)},
         });
 
-        // ------------------ MONTAGEM DO RESULTADO FINAL ------------------
+        // ------------------ DOENÇAS ATIVAS POR FAZENDA ------------------
+        interface DoencaAnimalRegistro {
+            idDoenca: bigint | number | string;
+            doenca?: { id: string | number; nome?: string } | null;
+        }
+        
+        const doencasAtivasRegistros: DoencaAnimalRegistro[] = await (prisma as any).doencaAnimal.findMany({
+            where: {
+                AND: [
+                    {
+                        animal: {
+                            fazenda: {
+                                idProprietario: BigInt(userId),
+                            },
+                        },
+                    },
+                    {
+                        OR: [
+                            { emTratamento: true },
+                            { dataFimTratamento: null },
+                        ],
+                    },
+                ],
+            },
+            include: { doenca: true },
+        });
+        
+        const doencasMap: Record<string, { doenca: any; count: number }> = {};
+        doencasAtivasRegistros.forEach((r) => {
+            const id = String(r.idDoenca);
+            if (!doencasMap[id]) {
+                doencasMap[id] = { doenca: r.doenca ?? { id: id, nome: 'Desconhecida' }, count: 0 };
+            }
+            doencasMap[id].count += 1;
+        });
+        
+        const doencasPorFazenda = Object.values(doencasMap).sort((a, b) => b.count - a.count);
         const taxaReproducao = totalAnimais > 0
             ? Math.round((animaisReprodutivos / totalAnimais) * 100)
             : 0;
@@ -151,10 +187,10 @@ export const getDashboardData = async (req: Request, res: Response) => {
             totalAnimais,
             totalAnimaisComRegistro,
             totalFazendasDoCriador,
-            totalAnimaisVendidos
+            totalAnimaisVendidos,
+            doencasPorFazenda
         });
     } catch (error) {
-        console.error("Erro ao buscar dados do dashboard:", error);
-        res.status(500).json({message: "Erro interno do servidor"});
+        next(error);
     }
 };

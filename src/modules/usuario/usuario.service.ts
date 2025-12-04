@@ -1,37 +1,38 @@
 import {Prisma, Usuario} from "@prisma/client"
 import {usuarioRepository} from "./usuario.repository"
 import {injectable} from "tsyringe";
+import {ApiError} from "../../types/ApiError";
 
 @injectable()
 export class UsuarioService {
     create = async (data: Prisma.UsuarioCreateInput) => {
         // Se for registro via Google, CPF pode ser opcional; email continua obrigatório
-        if (!data.googleId) {
+        if (!(data as any).googleId) {
             if (!data.cpf || !data.email) {
-                throw new Error("CPF e E-mail são obrigatórios");
+                throw new ApiError(406, "CPF e E-mail são obrigatórios");
             }
         } else {
             if (!data.email) {
-                throw new Error("E-mail é obrigatório para autenticação Google");
+                throw new ApiError(406, "E-mail é obrigatório para autenticação Google");
             }
         }
 
         if (data.cpf) {
             const existingCpf = await usuarioRepository.findByCpf(data.cpf)
             if (existingCpf) {
-                throw new Error("Usuario com esse CPF já existe");
+                throw new ApiError(409, "Usuario com esse CPF já existe");
             }
         }
 
         if (data.email) {
             const existingEmail = await usuarioRepository.findByEmail(data.email)
             if (existingEmail) {
-                throw new Error("Usuario com esse E-mail já existe");
+                throw new ApiError(409, "Usuario com esse E-mail já existe");
             }
         }
 
-        if (!data.googleId && !validaDataDeNascimento(data.dataNascimento)) {
-            throw new Error("Data de nascimento inválida (futura ou formato inválido)");
+        if (!(data as any).googleId && !validaDataDeNascimento(data.dataNascimento)) {
+            throw new ApiError(406, "Data de nascimento inválida (futura ou formato inválido)");
         }
 
         // Cria e retorna o novo usuário
@@ -65,15 +66,15 @@ export class UsuarioService {
     update = async (id: bigint, data: Prisma.UsuarioUpdateInput) => {
         if (typeof data.cpf === "string") {
             const exist = await usuarioRepository.findByCpf(data.cpf);
-            if (exist && exist.id !== id) throw new Error("Usuario com esse CPF já existe");
+            if (exist && exist.id !== id) throw new ApiError(409,"Usuario com esse CPF já existe");
         }
         if (typeof data.email === "string") {
             const exist = await usuarioRepository.findByEmail(data.email);
-            if (exist && exist.id !== id) throw new Error("Usuario com esse E-mail já existe");
+            if (exist && exist.id !== id) throw new ApiError(409,"Usuario com esse E-mail já existe");
         }
         if (typeof (data as any).dataNascimento !== "undefined") {
             const dn = (data as any).dataNascimento;
-            if (!validaDataDeNascimento(dn)) throw new Error("dataNascimento inválida (futura ou formato inválido)");
+            if (!validaDataDeNascimento(dn)) throw new ApiError(406,"Data de nascimento inválida (futura ou formato inválido)");
             (data as any).dataNascimento = dn ? new Date(dn) : null;
         }
         return usuarioRepository.update(id, data);

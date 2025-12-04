@@ -15,7 +15,7 @@ const tipoVacinaController = container.resolve(TipoVacinaController);
 
 /**
  * @swagger
- * /tipo-vacina/:
+ * /api/tipo-vacina/:
  *   post:
  *     summary: Cria um novo tipo de vacina
  *     tags: [TipoVacina]
@@ -56,7 +56,7 @@ router.post(
 
 /**
  * @swagger
- * /tipo-vacina/:
+ * /api/tipo-vacina/:
  *   get:
  *     summary: Retorna todos os tipos de vacina
  *     tags: [TipoVacina]
@@ -76,7 +76,7 @@ router.get(
 
 /**
  * @swagger
- * /tipo-vacina/id/{id}:
+ * /api/tipo-vacina/id/{id}:
  *   get:
  *     summary: Retorna um tipo de vacina pelo ID
  *     tags: [TipoVacina]
@@ -102,7 +102,7 @@ router.get(
 
 /**
  * @swagger
- * /tipo-vacina/nome/{nome}:
+ * /api/tipo-vacina/nome/{nome}:
  *   get:
  *     summary: Retorna tipos de vacina pelo nome
  *     tags: [TipoVacina]
@@ -128,7 +128,7 @@ router.get(
 
 /**
  * @swagger
- * /tipo-vacina/{id}:
+ * /api/tipo-vacina/{id}:
  *   put:
  *     summary: Atualiza um tipo de vacina pelo ID
  *     tags: [TipoVacina]
@@ -175,7 +175,7 @@ router.put(
 
 /**
  * @swagger
- * /tipo-vacina/{id}:
+ * /api/tipo-vacina/{id}:
  *   delete:
  *     summary: Deleta um tipo de vacina pelo ID
  *     tags: [TipoVacina]

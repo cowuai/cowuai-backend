@@ -157,11 +157,20 @@ async function main() {
 
   const fazendasCriadas: any[] = [];
   for (const fazenda of fazendas) {
-    const f = await prisma.fazenda.upsert({
-      where: { afixo: fazenda.afixo },
-      update: fazenda,
-      create: fazenda,
+    const existing = await prisma.fazenda.findFirst({
+      where: { idProprietario: fazenda.idProprietario },
     });
+
+    let f;
+    if (existing) {
+      f = await prisma.fazenda.update({
+        where: { id: existing.id },
+        data: fazenda,
+      });
+    } else {
+      f = await prisma.fazenda.create({ data: fazenda });
+    }
+
     fazendasCriadas.push(f);
   }
   console.log("Fazendas criadas.");
@@ -279,6 +288,34 @@ async function main() {
       dataInicioTratamento: new Date("2024-03-05"),
       dataFimTratamento: new Date("2024-03-20"),
       observacoes: "Caso resolvido, animal liberado para o pasto.",
+    },
+    // Novos registros de doenças para animais do Usuário de Teste
+    {
+      idAnimal: animaisCriados[1].id, // Vaca Mimosa
+      idDoenca: doencasCriadas[1].id, // Brucelose
+      dataDiagnostico: new Date("2024-08-01"),
+      emTratamento: true,
+      dataInicioTratamento: new Date("2024-08-01"),
+      dataFimTratamento: null,
+      observacoes: "Suspeita clínica de brucelose, tratamento iniciado.",
+    },
+    {
+      idAnimal: animaisCriados[0].id, // Boi Valente
+      idDoenca: doencasCriadas[2].id, // Pododermatite (recorrente)
+      dataDiagnostico: new Date("2025-01-15"),
+      emTratamento: true,
+      dataInicioTratamento: new Date("2025-01-15"),
+      dataFimTratamento: null,
+      observacoes: "Recorrência de lesão de casco, em tratamento tópico.",
+    },
+    {
+      idAnimal: animaisCriados[1].id, // Vaca Mimosa
+      idDoenca: doencasCriadas[0].id, // Mastite (registro adicional)
+      dataDiagnostico: new Date("2023-11-20"),
+      emTratamento: false,
+      dataInicioTratamento: new Date("2023-11-20"),
+      dataFimTratamento: new Date("2023-11-27"),
+      observacoes: "Caso leve, recebeu tratamento e evoluiu bem.",
     },
   ];
 

@@ -1,4 +1,4 @@
-import {Request, Response} from "express";
+import {Request, Response, NextFunction} from "express";
 import {AuthService} from "./auth.service";
 import {inject, injectable} from "tsyringe";
 
@@ -7,7 +7,7 @@ export class AuthController {
     constructor(@inject(AuthService) private authService: AuthService) {
     }
 
-    login = async (req: Request, res: Response) => {
+    login = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, senha, dispositivo} = req.body;
             const {
@@ -27,13 +27,12 @@ export class AuthController {
             })
 
             return res.status(200).json({accessToken, user, expiresIn});
-        } catch (err: any) {
-            console.error("Erro ao logar:", err);
-            return res.status(400).json({error: err.message});
+        } catch (error) {
+            next(error);
         }
     }
 
-    refresh = async (req: Request, res: Response) => {
+    refresh = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {refreshToken: bodyToken} = req.body;
             const refreshToken = req.cookies.refreshToken || bodyToken;
@@ -43,12 +42,12 @@ export class AuthController {
 
             const {accessToken, user, expiresIn} = await this.authService.refresh(refreshToken); //inclui user
             return res.json({accessToken, user, expiresIn}); // <<< devolve user
-        } catch (err: any) {
-            return res.status(401).json({error: err.message});
+        } catch (error) {
+            next(error);
         }
     };
 
-    logout = async (req: Request, res: Response) => {
+    logout = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {userId} = (req as any).user;
             console.log('Nova requisição recebida em /logout');
@@ -69,45 +68,45 @@ export class AuthController {
             });
 
             return res.status(204).send();
-        } catch (err: any) {
-            return res.status(400).json({error: err.message});
+        } catch (error) {
+            next(error);
         }
     }
 
-    forgotPassword = async (req: Request, res: Response) => {
+    forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email} = req.body;
 
             await this.authService.forgotPassword(email);
             return res.status(200).json({message: "Instruções para redefinição de senha enviadas para o email."});
-        } catch (err: any) {
-            return res.status(400).json({error: err.message});
+        } catch (error) {
+            next(error);
         }
     }
 
-    resetPassword = async (req: Request, res: Response) => {
+    resetPassword = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {token, password} = req.body;
 
             await this.authService.resetPassword(token, password);
             return res.status(200).json({message: "Senha redefinida com sucesso."});
-        } catch (err: any) {
-            return res.status(400).json({error: err.message});
+        } catch (error) {
+            next(error);
         }
     }
 
-    validateResetToken = async (req: Request, res: Response) => {
+    validateResetToken = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {token} = req.body;
 
             await this.authService.validateResetToken(token);
             return res.status(200).json({message: "Token válido."});
-        } catch (err: any) {
-            return res.status(400).json({error: err.message});
+        } catch (error) {
+            next(error);
         }
     }
 
-    googleCallback = async (req: Request, res: Response) => {
+    googleCallback = async (req: Request, res: Response, next: NextFunction) => {
         try {
             // O passport adiciona o usuário em req.user após o sucesso
             const user = (req as any).user;
@@ -136,8 +135,8 @@ export class AuthController {
             const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
             return res.redirect(`${frontendUrl}/auth/callback?accessToken=${accessToken}`);
 
-        } catch (err: any) {
-            console.error("Erro no callback do Google:", err);
+        } catch (error) {
+            console.error("Erro no callback do Google OAuth:", error);
             return res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
         }
     }

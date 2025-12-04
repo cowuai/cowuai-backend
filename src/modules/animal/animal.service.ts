@@ -1,10 +1,11 @@
-import { animalRepository } from "./animal.repository";
-import { Animal } from "@prisma/client";
-import { injectable } from "tsyringe";
+import {animalRepository} from "./animal.repository";
+import {Animal} from "@prisma/client";
+import {injectable} from "tsyringe";
+import {ApiError} from "../../types/ApiError";
 
 interface PaginatedAnimalsResult {
-  animals: Animal[];
-  total: number;
+    animals: Animal[];
+    total: number;
 }
 
 @injectable()
@@ -15,97 +16,97 @@ export class AnimalService {
         const idProprietario = data.idProprietario ?? 0n;
 
         const existingAnimal = await animalRepository.findByNumeroParticularAndProprietario(
-           numeroParticular,
-           idProprietario
+            numeroParticular,
+            idProprietario
         );
 
         if (existingAnimal) {
-            throw new Error("Já existe um animal com esse número particular para este proprietário");
+            throw new ApiError(409, "Já existe um animal com esse número particular para este proprietário");
         }
 
-    return animalRepository.create(data);
-  };
+        return animalRepository.create(data);
+    };
 
-  findAllPaginated = async (
-    page: number,
-    pageSize: number
-  ): Promise<PaginatedAnimalsResult> => {
-    const skip = (page - 1) * pageSize;
+    findAllPaginated = async (
+        page: number,
+        pageSize: number
+    ): Promise<PaginatedAnimalsResult> => {
+        const skip = (page - 1) * pageSize;
 
-    // Chama os novos métodos do repositório
-    const animalsPromise = animalRepository.findManyPaginated(skip, pageSize);
-    const totalPromise = animalRepository.countAll();
+        // Chama os novos métodos do repositório
+        const animalsPromise = animalRepository.findManyPaginated(skip, pageSize);
+        const totalPromise = animalRepository.countAll();
 
-    // Executa as duas consultas em paralelo
-    const [animals, total] = await Promise.all([animalsPromise, totalPromise]);
+        // Executa as duas consultas em paralelo
+        const [animals, total] = await Promise.all([animalsPromise, totalPromise]);
 
-    return { animals, total };
-  };
+        return {animals, total};
+    };
 
-  findById = async (id: bigint) => {
-    const animal = await animalRepository.findById(id);
-    if (!animal) {
-      throw new Error("Animal não encontrado");
-    }
-    return animal;
-  };
+    findById = async (id: bigint) => {
+        const animal = await animalRepository.findById(id);
+        if (!animal) {
+            throw new ApiError(404, "Animal não encontrado");
+        }
+        return animal;
+    };
 
-  findByProprietario = async (idProprietario: bigint) => {
-    const animals = await animalRepository.findByProprietario(idProprietario);
-    if (!animals || animals.length === 0) {
-      throw new Error("Nenhum animal encontrado para este proprietário");
-    }
-    return animals;
-  };
+    findByProprietario = async (idProprietario: bigint) => {
+        const animals = await animalRepository.findByProprietario(idProprietario);
+        if (!animals || animals.length === 0) {
+            throw new ApiError(404, "Nenhum animal encontrado para este proprietário");
+        }
+        return animals;
+    };
 
-  findByFazenda = async (idFazenda: bigint) => {
-    const animals = await animalRepository.findByFazenda(idFazenda);
-    if (!animals || animals.length === 0) {
-      throw new Error("Nenhum animal encontrado para esta fazenda");
-    }
-    return animals;
-  };
+    findByFazenda = async (idFazenda: bigint) => {
+        const animals = await animalRepository.findByFazenda(idFazenda);
+        if (!animals || animals.length === 0) {
+            throw new ApiError(404, "Nenhum animal encontrado para esta fazenda");
+        }
+        return animals;
+    };
 
-  update = async (id: bigint, data: Partial<Animal>) => {
-    const existingAnimal = await animalRepository.findById(id);
-    if (!existingAnimal) {
-      throw new Error("Animal não encontrado");
-    }
+    update = async (id: bigint, data: Partial<Animal>) => {
+        const existingAnimal = await animalRepository.findById(id);
+        if (!existingAnimal) {
+            throw new ApiError(404, "Animal não encontrado");
+        }
 
-    if (
-      data.numeroParticularProprietario &&
-      data.numeroParticularProprietario !==
-        existingAnimal.numeroParticularProprietario &&
-      existingAnimal.idProprietario // garante que não é null
-    ) {
-      const duplicateAnimal =
-        await animalRepository.findByNumeroParticularAndProprietario(
-          data.numeroParticularProprietario,
-          existingAnimal.idProprietario
-        );
+        if (
+            data.numeroParticularProprietario &&
+            data.numeroParticularProprietario !==
+            existingAnimal.numeroParticularProprietario &&
+            existingAnimal.idProprietario // garante que não é null
+        ) {
+            const duplicateAnimal =
+                await animalRepository.findByNumeroParticularAndProprietario(
+                    data.numeroParticularProprietario,
+                    existingAnimal.idProprietario
+                );
 
-      if (duplicateAnimal) {
-        throw new Error(
-          "Outro animal com esse número particular já existe para este proprietário"
-        );
-      }
-    }
+            if (duplicateAnimal) {
+                throw new ApiError(409,
+                    "Outro animal com esse número particular já existe para este proprietário"
+                );
+            }
+        }
 
-    return animalRepository.update(id, data);
-  };
+        return animalRepository.update(id, data);
+    };
 
-  delete = async (id: bigint) => {
-    const existingAnimal = await animalRepository.findById(id);
-    if (!existingAnimal) {
-      throw new Error("Animal não encontrado");
-    }
-    return animalRepository.delete(id);
-  };
+    delete = async (id: bigint) => {
+        const existingAnimal = await animalRepository.findById(id);
+        if (!existingAnimal) {
+            throw new ApiError(404, "Animal não encontrado");
+        }
+        return animalRepository.delete(id);
+    };
 
     async findByIdWithRelations(bigint: bigint, relation: string) {
         const animalWithRelations = await animalRepository.findByIdWithRelations(bigint, relation);
         if (!animalWithRelations) {
-            throw new Error("Animal não encontrado");
+            throw new ApiError(404, "Animal não encontrado");
         }
         return animalWithRelations;
     }
