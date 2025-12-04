@@ -136,7 +136,38 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             where: {idProprietario: BigInt(userId)},
         });
 
-        // ------------------ MONTAGEM DO RESULTADO FINAL ------------------
+        // ------------------ DOENÇAS ATIVAS POR FAZENDA ------------------
+        const doencasAtivasRegistros = await (prisma as any).doencaAnimal.findMany({
+            where: {
+                AND: [
+                    {
+                        animal: {
+                            fazenda: {
+                                idProprietario: BigInt(userId),
+                            },
+                        },
+                    },
+                    {
+                        OR: [
+                            { emTratamento: true },
+                            { dataFimTratamento: null },
+                        ],
+                    },
+                ],
+            },
+            include: { doenca: true },
+        });
+
+        const doencasMap: Record<string, { doenca: any; count: number }> = {};
+        doencasAtivasRegistros.forEach((r) => {
+            const id = String(r.idDoenca);
+            if (!doencasMap[id]) {
+                doencasMap[id] = { doenca: r.doenca ?? { id: id, nome: 'Desconhecida' }, count: 0 };
+            }
+            doencasMap[id].count += 1;
+        });
+
+        const doencasPorFazenda = Object.values(doencasMap).sort((a, b) => b.count - a.count);
         const taxaReproducao = totalAnimais > 0
             ? Math.round((animaisReprodutivos / totalAnimais) * 100)
             : 0;
@@ -151,7 +182,8 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             totalAnimais,
             totalAnimaisComRegistro,
             totalFazendasDoCriador,
-            totalAnimaisVendidos
+            totalAnimaisVendidos,
+            doencasPorFazenda
         });
     } catch (error) {
         next(error);

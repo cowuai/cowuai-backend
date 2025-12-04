@@ -289,6 +289,34 @@ async function main() {
       dataFimTratamento: new Date("2024-03-20"),
       observacoes: "Caso resolvido, animal liberado para o pasto.",
     },
+    // Novos registros de doenças para animais do Usuário de Teste
+    {
+      idAnimal: animaisCriados[1].id, // Vaca Mimosa
+      idDoenca: doencasCriadas[1].id, // Brucelose
+      dataDiagnostico: new Date("2024-08-01"),
+      emTratamento: true,
+      dataInicioTratamento: new Date("2024-08-01"),
+      dataFimTratamento: null,
+      observacoes: "Suspeita clínica de brucelose, tratamento iniciado.",
+    },
+    {
+      idAnimal: animaisCriados[0].id, // Boi Valente
+      idDoenca: doencasCriadas[2].id, // Pododermatite (recorrente)
+      dataDiagnostico: new Date("2025-01-15"),
+      emTratamento: true,
+      dataInicioTratamento: new Date("2025-01-15"),
+      dataFimTratamento: null,
+      observacoes: "Recorrência de lesão de casco, em tratamento tópico.",
+    },
+    {
+      idAnimal: animaisCriados[1].id, // Vaca Mimosa
+      idDoenca: doencasCriadas[0].id, // Mastite (registro adicional)
+      dataDiagnostico: new Date("2023-11-20"),
+      emTratamento: false,
+      dataInicioTratamento: new Date("2023-11-20"),
+      dataFimTratamento: new Date("2023-11-27"),
+      observacoes: "Caso leve, recebeu tratamento e evoluiu bem.",
+    },
   ];
 
   for (const doencaAnimal of doencasAnimais) {
