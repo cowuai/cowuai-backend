@@ -102,14 +102,6 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
                 }
             }
         });
-        const animaisReprodutivos = await prisma.animal.count({
-            where: {
-                status: "REPRODUZINDO",
-                fazenda: {
-                    idProprietario: BigInt(userId),
-                }
-            },
-        });
 
         // ------------------ TOTAL DE ANIMAIS COM REGISTRO -------------------
         const totalAnimaisComRegistro = await prisma.animal.count({
@@ -173,9 +165,6 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
         });
         
         const doencasPorFazenda = Object.values(doencasMap).sort((a, b) => b.count - a.count);
-        const taxaReproducao = totalAnimais > 0
-            ? Math.round((animaisReprodutivos / totalAnimais) * 100)
-            : 0;
 
         res.json({
             vacinacoesPorMes,
@@ -183,7 +172,6 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             tipoRaca,
             animaisPorSexo: animaisPorSexoFinal,
             animaisDoentes,
-            taxaReproducao,
             totalAnimais,
             totalAnimaisComRegistro,
             totalFazendasDoCriador,
