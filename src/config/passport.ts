@@ -28,8 +28,8 @@ passport.use(
                     user = await usuarioService.findByEmail(email);
 
                     if (user) {
-                            // Usuário existe, vamos vincular o Google ID a ele
-                            user = await usuarioService.update(user.id, { googleId } as any);
+                            // Usuário existe, vamos vincular o Google ID e atualizar a foto de perfil
+                            user = await usuarioService.update(user.id, { googleId, urlImagem: profile.photos?.[0]?.value } as Partial<typeof user>);
                         } else {
                             // 3. Usuário não existe, vamos criar
                             user = await usuarioService.create({

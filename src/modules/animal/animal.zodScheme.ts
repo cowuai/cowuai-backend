@@ -10,19 +10,20 @@ const emptyToUndefined = z.literal("").transform(() => undefined);
 const optionalString = z.string()
     .trim()
     .min(1, "Campo não pode ser vazio se informado")
+    .max(255, "Campo não pode ultrapassar 255 caracteres")
     .optional()
     .or(emptyToUndefined)
     .or(z.null());
 
 export const createAnimalSchema = z.object({
     body: z.object({
-        nome: z.string("O nome é obrigatório").trim().min(1, "O nome não pode ser vazio"),
+        nome: z.string("O nome é obrigatório").trim().min(1, "O nome não pode ser vazio").max(100, "O nome não pode ultrapassar 100 caracteres"),
         tipoRaca: z.enum(TipoRaca, "Tipo de raça é obrigatório"),
         sexo: z.enum(SexoAnimal, "Sexo do animal é obrigatório"),
         composicaoRacial: optionalString,
         dataNascimento: z.coerce.date().nullable().optional(),
-        numeroParticularProprietario: optionalString,
-        registro: optionalString,
+        numeroParticularProprietario: z.string().trim().min(1, "O número particular não pode ser vazio").max(10, "O número particular não pode ultrapassar 10 caracteres").nullable().optional(),
+        registro: z.string().trim().min(1, "O registro não pode ser vazio").max(10, "O registro não pode ultrapassar 10 caracteres").nullable().optional(),
         status: z.enum(StatusAnimal).optional().default("VIVO"),
         peso: z.coerce.number().positive("O peso deve ser positivo").nullable().optional(),
         localizacao: optionalString,
@@ -41,8 +42,8 @@ export const updateAnimalSchema = z.object({
         sexo: z.enum(SexoAnimal).optional(),
         composicaoRacial: optionalString,
         dataNascimento: z.coerce.date().nullable().optional(),
-        numeroParticularProprietario: optionalString,
-        registro: optionalString,
+        numeroParticularProprietario: z.string().trim().min(1, "O número particular não pode ser vazio").max(10, "O número particular não pode ultrapassar 10 caracteres").nullable().optional(),
+        registro: z.string().trim().min(1, "O registro não pode ser vazio").max(10, "O registro não pode ultrapassar 10 caracteres").nullable().optional(),
         status: z.enum(StatusAnimal).optional(),
         peso: z.coerce.number().positive().nullable().optional(),
         localizacao: optionalString,
