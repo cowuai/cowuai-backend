@@ -1,0 +1,60 @@
+import {z} from "zod";
+import {SexoAnimal, StatusAnimal, TipoRaca} from "@prisma/client";
+
+// Helper para validar IDs que são BigInt no banco
+const idSchema = z.coerce.number("ID deve ser um número válido")
+    .int().positive("ID deve ser um número positivo");
+
+const emptyToUndefined = z.literal("").transform(() => undefined);
+
+const optionalString = z.string()
+    .trim()
+    .min(1, "Campo não pode ser vazio se informado")
+    .optional()
+    .or(emptyToUndefined)
+    .or(z.null());
+
+export const createAnimalSchema = z.object({
+    body: z.object({
+        nome: z.string("O nome é obrigatório").trim().min(1, "O nome não pode ser vazio"),
+        tipoRaca: z.enum(TipoRaca, "Tipo de raça é obrigatório"),
+        sexo: z.enum(SexoAnimal, "Sexo do animal é obrigatório"),
+        composicaoRacial: optionalString,
+        dataNascimento: z.coerce.date().nullable().optional(),
+        numeroParticularProprietario: optionalString,
+        registro: optionalString,
+        status: z.enum(StatusAnimal).optional().default("VIVO"),
+        peso: z.coerce.number().positive("O peso deve ser positivo").nullable().optional(),
+        localizacao: optionalString,
+        idFazenda: idSchema,
+        idProprietario: idSchema,
+        idPai: idSchema.nullable().optional(),
+        idMae: idSchema.nullable().optional(),
+    }),
+});
+
+export const updateAnimalSchema = z.object({
+    params: z.object({id: idSchema}),
+    body: z.object({
+        nome: z.string().min(1).optional(),
+        tipoRaca: z.enum(TipoRaca).optional(),
+        sexo: z.enum(SexoAnimal).optional(),
+        composicaoRacial: optionalString,
+        dataNascimento: z.coerce.date().nullable().optional(),
+        numeroParticularProprietario: optionalString,
+        registro: optionalString,
+        status: z.enum(StatusAnimal).optional(),
+        peso: z.coerce.number().positive().nullable().optional(),
+        localizacao: optionalString,
+        idFazenda: idSchema.optional(),
+        idProprietario: idSchema.optional(),
+        idPai: idSchema.nullable().optional(),
+        idMae: idSchema.nullable().optional(),
+    }),
+});
+
+export const getAnimalByIdSchema = z.object({
+    params: z.object({
+        id: idSchema,
+    }),
+});
