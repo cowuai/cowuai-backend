@@ -7,7 +7,7 @@ import {ApiError} from "../../types/ApiError";
 export class UsuarioService {
     create = async (data: Prisma.UsuarioCreateInput) => {
         // Se for registro via Google, CPF pode ser opcional; email continua obrigatório
-        if (!data.googleId) {
+        if (!(data as any).googleId) {
             if (!data.cpf || !data.email) {
                 throw new ApiError(406, "CPF e E-mail são obrigatórios");
             }
@@ -31,7 +31,7 @@ export class UsuarioService {
             }
         }
 
-        if (!data.googleId && !validaDataDeNascimento(data.dataNascimento)) {
+        if (!(data as any).googleId && !validaDataDeNascimento(data.dataNascimento)) {
             throw new ApiError(406, "Data de nascimento inválida (futura ou formato inválido)");
         }
 

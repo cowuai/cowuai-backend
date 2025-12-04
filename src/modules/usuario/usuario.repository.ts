@@ -30,6 +30,7 @@ export const usuarioRepository = {
     },
 
     findByGoogleId: (googleId: string) => {
-        return prisma.usuario.findUnique({where: {googleId}});
+        // cast `where` to any because generated Prisma types may not include googleId in some contexts
+        return prisma.usuario.findFirst({ where: { googleId } as any });
     }
 }

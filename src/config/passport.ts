@@ -28,20 +28,20 @@ passport.use(
                     user = await usuarioService.findByEmail(email);
 
                     if (user) {
-                        // Usuário existe, vamos vincular o Google ID a ele
-                        user = await usuarioService.update(user.id, { googleId });
-                    } else {
-                        // 3. Usuário não existe, vamos criar
-                        user = await usuarioService.create({
-                            nome: profile.displayName || "Usuário Google",
-                            email: email,
-                            googleId: googleId,
-                            ativo: true,
-                            cpf: null,
-                            senha: null,
-                            urlImagem: profile.photos?.[0]?.value || null,
-                        });
-                    }
+                            // Usuário existe, vamos vincular o Google ID a ele
+                            user = await usuarioService.update(user.id, { googleId } as any);
+                        } else {
+                            // 3. Usuário não existe, vamos criar
+                            user = await usuarioService.create({
+                                nome: profile.displayName || "Usuário Google",
+                                email: email,
+                                googleId: googleId,
+                                ativo: true,
+                                cpf: "",
+                                senha: "",
+                                urlImagem: profile.photos?.[0]?.value || "",
+                            } as any);
+                        }
                 }
 
                 return done(null, user);

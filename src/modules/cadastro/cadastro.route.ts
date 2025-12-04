@@ -119,7 +119,6 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             cpf,
             nome,
             email,
-            googleId: null,
             senha: hashedPassword,
             dataNascimento: dataNascimento ? new Date(dataNascimento) : null,
             ativo: true,
@@ -128,7 +127,7 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             urlImagem: urlImagem || "",
             resetPasswordToken: null,
             resetPasswordExpires: null
-        });
+        } as any);
 
         await fazendaService.create({
             ...req.body.fazenda,
