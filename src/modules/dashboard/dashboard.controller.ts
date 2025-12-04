@@ -137,7 +137,12 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
         });
 
         // ------------------ DOENÇAS ATIVAS POR FAZENDA ------------------
-        const doencasAtivasRegistros = await (prisma as any).doencaAnimal.findMany({
+        interface DoencaAnimalRegistro {
+            idDoenca: bigint | number | string;
+            doenca?: { id: string | number; nome?: string } | null;
+        }
+        
+        const doencasAtivasRegistros: DoencaAnimalRegistro[] = await (prisma as any).doencaAnimal.findMany({
             where: {
                 AND: [
                     {
@@ -157,7 +162,7 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             },
             include: { doenca: true },
         });
-
+        
         const doencasMap: Record<string, { doenca: any; count: number }> = {};
         doencasAtivasRegistros.forEach((r) => {
             const id = String(r.idDoenca);
@@ -166,7 +171,7 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             }
             doencasMap[id].count += 1;
         });
-
+        
         const doencasPorFazenda = Object.values(doencasMap).sort((a, b) => b.count - a.count);
         const taxaReproducao = totalAnimais > 0
             ? Math.round((animaisReprodutivos / totalAnimais) * 100)
