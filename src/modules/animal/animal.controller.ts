@@ -69,7 +69,7 @@ export class AnimalController {
         try {
             const {id, relation} = req.params;
 
-            // Validação manual simples para a string de relação (Zod valida IDs, mas essa string específica pode ser checada aqui ou num schema específico)
+            // Validação manual simples para a ‘string’ de relação (Zod valida IDs, mas essa string específica pode ser checada aqui ou num schema específico)
             if (!["pais", "filhos", "vacinacoes"].includes(relation)) {
                 return res
                     .status(400)
@@ -86,13 +86,40 @@ export class AnimalController {
         }
     };
 
-    findByProprietario = async (req: Request, res: Response, next: NextFunction) => {
+    findByProprietarioPaginated = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {idProprietario} = req.params;
-            const animals = await this.animalService.findByProprietario(
-                BigInt(idProprietario)
+            const {page, pageSize} = req.query;
+
+            // Validar parâmetros de paginação (Query params são ‘strings’ por padrão)
+            const pageNum = parseInt(page as string) || 1;
+            const pageSizeNum = parseInt(pageSize as string) || 10;
+
+            if (pageNum < 1 || pageSizeNum < 1) {
+                return res.status(400).json({
+                    error:
+                        "Parâmetros de paginação (page, pageSize) devem ser positivos.",
+                });
+            }
+
+            const {animals, total} = await this.animalService.findByProprietarioPaginated(
+                BigInt(idProprietario),
+                pageNum,
+                pageSizeNum
             );
-            res.status(200).json(animals);
+
+            const totalPages = Math.ceil(total / pageSizeNum);
+
+            res.status(200).json({
+                data: animals,
+                pagination: {
+                    page: pageNum,
+                    pageSize: pageSizeNum,
+                    totalItems: total,
+                    totalPages: totalPages,
+                },
+            });
+
         } catch (error) {
             next(error);
         }

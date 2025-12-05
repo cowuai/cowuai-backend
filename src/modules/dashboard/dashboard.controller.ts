@@ -178,11 +178,6 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             })
         );
 
-        // ------------------ MONTAGEM DO RESULTADO FINAL ------------------
-        const taxaReproducao = totalAnimais > 0
-            ? Math.round((animaisReprodutivos / totalAnimais) * 100)
-            : 0;
-
         res.json({
             vacinacoesPorMes,
             animaisPorLocalizacao,
