@@ -78,13 +78,14 @@ model Animal {
   idPai         BigInt?  @map("id_pai") @db.BigInt
   filhosComoPai Animal[] @relation("PaiRelation")
 
-  mae            Animal?  @relation("MaeRelation", fields: [idMae], references: [id], onDelete: SetNull) // ⬅️ ALTERADO AQUI
-  idMae          BigInt?  @map("id_mae") @db.BigInt
-  filhosComoMae  Animal[] @relation("MaeRelation")
+  mae           Animal?  @relation("MaeRelation", fields: [idMae], references: [id], onDelete: SetNull) // ⬅️ ALTERADO AQUI
+  idMae         BigInt?  @map("id_mae") @db.BigInt
+  filhosComoMae Animal[] @relation("MaeRelation")
+
   // Relação com Fazenda
-  fazenda        Fazenda  @relation(fields: [idFazenda], references: [id])
-  idFazenda      BigInt   @db.BigInt
-  idProprietario BigInt?
+  fazenda        Fazenda @relation(fields: [idFazenda], references: [id])
+  idFazenda      BigInt  @db.BigInt
+  idProprietario BigInt  @db.BigInt
 
   vacinacoes VacinaAplicada[]
   doencas    DoencaAnimal[]
@@ -226,7 +227,6 @@ enum StatusAnimal {
   DOADO
   ROUBADO
   DOENTE
-  REPRODUZINDO
 }
 
 enum FrequenciaVacina {

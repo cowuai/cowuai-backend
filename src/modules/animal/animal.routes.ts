@@ -6,7 +6,7 @@ import {
   createAnimalSchema,
   updateAnimalSchema,
   getAnimalByIdSchema,
-} from "./animal.schema"; // <--- Importante
+} from "./animal.zodScheme"; // <--- Importante
 import { container } from "tsyringe";
 
 const router = Router();
@@ -179,7 +179,7 @@ router.get("/", authMiddleware, animalController.findAll);
 router.get(
   "/id/:id",
   authMiddleware,
-  validateResource(getAnimalByIdSchema), // <--- Validação Zod aqui
+  validateResource(getAnimalByIdSchema),
   animalController.findById
 );
 
@@ -204,7 +204,7 @@ router.get(
 router.put(
   "/:id",
   authMiddleware,
-  validateResource(updateAnimalSchema), // <--- Validação Zod aqui
+  validateResource(updateAnimalSchema),
   animalController.update
 );
 
@@ -212,7 +212,7 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
-  validateResource(getAnimalByIdSchema), // <--- Validação Zod aqui
+  validateResource(getAnimalByIdSchema),
   animalController.delete
 );
 

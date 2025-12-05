@@ -7,6 +7,7 @@ import {randomUUID} from "node:crypto";
 import {prisma} from "../../config/prisma";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import {ApiError} from "../../types/ApiError";
 
 @injectable()
 export class AuthService {
@@ -16,12 +17,12 @@ export class AuthService {
     async login(email: string, password: string, dispositivo?: string) {
         const user = await this.usuarioService.findByEmail(email);
 
-        if (!user) throw new Error("Usuário não encontrado");
+        if (!user) throw new ApiError(404, "Usuário não encontrado");
 
-        if (!user.senha) throw new Error("Usuário cadastrado via provedor externo. Use o login social.");
+        if (!user.senha) throw new ApiError(406, "Usuário cadastrado via provedor externo. Use o login social.");
 
         const isPasswordValid = await bcrypt.compare(password, user.senha);
-        if (!isPasswordValid) throw new Error("Senha inválida");
+        if (!isPasswordValid) throw new ApiError(400, "Senha inválida");
 
         const {accessToken, refreshToken} = await this.generateTokensForUser(user, dispositivo);
 
@@ -39,7 +40,7 @@ export class AuthService {
             include: {usuario: true},
         });
         if (!stored || stored.expiresAt < new Date()) {
-            throw new Error("Refresh token inválido ou expirado");
+            throw new ApiError(401, "Refresh token inválido ou expirado");
         }
 
         const newAccessToken = jwt.sign(
@@ -57,7 +58,7 @@ export class AuthService {
     }
 
     async logout(idUsuario: string) {
-        if (!idUsuario) throw new Error("ID do usuário é obrigatório");
+        if (!idUsuario) throw new ApiError(406, "ID do usuário é obrigatório");
 
         await prisma.refreshToken.deleteMany({where: {idUsuario: BigInt(idUsuario)}});
     }
@@ -105,7 +106,7 @@ export class AuthService {
 
     async forgotPassword(email: string) {
         const user = await this.usuarioService.findByEmail(email);
-        if (!user) throw new Error("Usuário não encontrado");
+        if (!user) throw new ApiError(404, "Usuário não encontrado");
 
         // Gera um token aleatório seguro (não JWT)
         const token = crypto.randomBytes(32).toString("hex");
@@ -201,7 +202,7 @@ export class AuthService {
         const user = await this.usuarioService.findByResetToken(token);
 
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-            throw new Error("Token inválido ou expirado");
+            throw new ApiError(401, "Token inválido ou expirado");
         }
 
         const hashedPassword = await bcrypt.hash(novaSenha, 10);
@@ -219,7 +220,7 @@ export class AuthService {
         const user = await this.usuarioService.findByResetToken(token);
 
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-            throw new Error("Token inválido ou expirado");
+            throw new ApiError(401, "Token inválido ou expirado");
         }
 
         return {message: "Token válido."};

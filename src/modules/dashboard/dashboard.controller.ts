@@ -1,7 +1,7 @@
-import {Request, Response} from "express";
+import {Request, Response, NextFunction} from "express";
 import {prisma} from "../../config/prisma";
 
-export const getDashboardData = async (req: Request, res: Response) => {
+export const getDashboardData = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const {userId} = (req as any).user;
 
@@ -102,14 +102,6 @@ export const getDashboardData = async (req: Request, res: Response) => {
                 }
             }
         });
-        const animaisReprodutivos = await prisma.animal.count({
-            where: {
-                status: "REPRODUZINDO",
-                fazenda: {
-                    idProprietario: BigInt(userId),
-                }
-            },
-        });
 
         // ------------------ TOTAL DE ANIMAIS COM REGISTRO -------------------
         const totalAnimaisComRegistro = await prisma.animal.count({
@@ -170,7 +162,6 @@ export const getDashboardData = async (req: Request, res: Response) => {
             tipoRaca,
             animaisPorSexo: animaisPorSexoFinal,
             animaisDoentes,
-            taxaReproducao,
             totalAnimais,
             totalAnimaisComRegistro,
             totalFazendasDoCriador,
@@ -178,7 +169,6 @@ export const getDashboardData = async (req: Request, res: Response) => {
             animaisCadastradosPorAno
         });
     } catch (error) {
-        console.error("Erro ao buscar dados do dashboard:", error);
-        res.status(500).json({message: "Erro interno do servidor"});
+        next(error);
     }
 };

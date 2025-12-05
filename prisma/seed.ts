@@ -1,13 +1,14 @@
 import {
-  PrismaClient,
-  SexoAnimal,
-  FrequenciaVacina,
-  TipoRaca,
-  StatusAnimal,
-  Porte,
+    PrismaClient,
+    SexoAnimal,
+    FrequenciaVacina,
+    TipoRaca,
+    StatusAnimal,
+    Porte, VacinaAplicada,
+    $Enums,
 } from "@prisma/client";
 
-const prisma = new PrismaClient() as any;
+const prisma = new PrismaClient();
 
 async function main() {
   
@@ -1953,12 +1954,12 @@ async function main() {
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-    console.log("Seed finalizado com sucesso.");
-  })
-  .catch(async (e) => {
-    console.error("Erro ao executar seed:", e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+    .then(async () => {
+        await prisma.$disconnect();
+        console.log("🏁 Seed finalizado com sucesso.");
+    })
+    .catch(async (e) => {
+        console.error("❌ Erro ao executar seed:", e);
+        await prisma.$disconnect();
+        process.exit(1);
+    });
