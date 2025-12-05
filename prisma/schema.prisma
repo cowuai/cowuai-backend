@@ -138,6 +138,7 @@ model VacinaAplicada {
   dataCadastro    DateTime   @default(now()) @map("data_cadastro")
   dataAtualizacao DateTime   @updatedAt @map("data_atualizacao")
 
+  @@unique([idAnimal, idTipoVacina, dataAplicacao])
   @@map("vacina_aplicada")
 }
 
@@ -169,6 +170,7 @@ model DoencaAnimal {
   animal Animal @relation(fields: [idAnimal], references: [id])
   doenca Doenca @relation(fields: [idDoenca], references: [id])
 
+  @@unique([idAnimal, idDoenca, dataDiagnostico])
   @@index([idAnimal])
   @@index([idDoenca])
   @@map("doenca_animal")

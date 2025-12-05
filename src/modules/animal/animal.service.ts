@@ -66,12 +66,27 @@ export class AnimalService {
         return animal;
     };
 
-    findByProprietario = async (idProprietario: bigint) => {
-        const animals = await animalRepository.findByProprietario(idProprietario);
-        if (!animals || animals.length === 0) {
+    findByProprietarioPaginated = async (
+        idProprietario: bigint,
+        page: number,
+        pageSize: number
+    ): Promise<PaginatedAnimalsResult> => {
+        const skip = (page - 1) * pageSize;
+
+        const animalsPromise = animalRepository.findByProprietarioPaginated(
+            idProprietario,
+            skip,
+            pageSize
+        );
+        const totalPromise = animalRepository.countByProprietario(idProprietario);
+
+        const [animals, total] = await Promise.all([animalsPromise, totalPromise]);
+
+        if (!total || total === 0) {
             throw new ApiError(404, "Nenhum animal encontrado para este proprietário");
         }
-        return animals;
+
+        return {animals, total};
     };
 
     findByFazenda = async (idFazenda: bigint) => {
