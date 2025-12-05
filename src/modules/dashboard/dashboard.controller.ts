@@ -128,43 +128,33 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             where: {idProprietario: BigInt(userId)},
         });
 
-        // ------------------ DOENÇAS ATIVAS POR FAZENDA ------------------
-        interface DoencaAnimalRegistro {
-            idDoenca: bigint | number | string;
-            doenca?: { id: string | number; nome?: string } | null;
-        }
-        
-        const doencasAtivasRegistros: DoencaAnimalRegistro[] = await (prisma as any).doencaAnimal.findMany({
+        // ------------------ ANIMAIS CADASTRADOS POR ANO -------------------
+        const animaisPorAno = await prisma.animal.findMany({
+            select: {dataNascimento: true},
             where: {
-                AND: [
-                    {
-                        animal: {
-                            fazenda: {
-                                idProprietario: BigInt(userId),
-                            },
-                        },
-                    },
-                    {
-                        OR: [
-                            { emTratamento: true },
-                            { dataFimTratamento: null },
-                        ],
-                    },
-                ],
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                },
+                dataNascimento: {not: null},
             },
-            include: { doenca: true },
         });
-        
-        const doencasMap: Record<string, { doenca: any; count: number }> = {};
-        doencasAtivasRegistros.forEach((r) => {
-            const id = String(r.idDoenca);
-            if (!doencasMap[id]) {
-                doencasMap[id] = { doenca: r.doenca ?? { id: id, nome: 'Desconhecida' }, count: 0 };
+
+        const animaisPorAnoMap: Record<string, number> = {};
+        animaisPorAno.forEach(a => {
+            if (a.dataNascimento) {
+                const ano = new Date(a.dataNascimento).getFullYear().toString();
+                animaisPorAnoMap[ano] = (animaisPorAnoMap[ano] || 0) + 1;
             }
-            doencasMap[id].count += 1;
         });
-        
-        const doencasPorFazenda = Object.values(doencasMap).sort((a, b) => b.count - a.count);
+
+        const animaisCadastradosPorAno = Object.entries(animaisPorAnoMap)
+            .map(([ano, count]) => ({ano, count}))
+            .sort((a, b) => parseInt(a.ano) - parseInt(b.ano));
+
+        // ------------------ MONTAGEM DO RESULTADO FINAL ------------------
+        const taxaReproducao = totalAnimais > 0
+            ? Math.round((animaisReprodutivos / totalAnimais) * 100)
+            : 0;
 
         res.json({
             vacinacoesPorMes,
@@ -176,7 +166,7 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             totalAnimaisComRegistro,
             totalFazendasDoCriador,
             totalAnimaisVendidos,
-            doencasPorFazenda
+            animaisCadastradosPorAno
         });
     } catch (error) {
         next(error);
