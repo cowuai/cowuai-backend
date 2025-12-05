@@ -26,6 +26,10 @@ export const animalRepository = {
         return prisma.animal.findUnique({where: {id}});
     },
 
+    findByProprietario: (idProprietario: bigint): Promise<Animal[]> => {
+        return prisma.animal.findMany({where: {idProprietario}});
+    },
+
     findByProprietarioPaginated: (idProprietario: bigint, skip: number, take: number): Promise<Animal[]> => {
         return prisma.animal.findMany({
             where: {idProprietario},

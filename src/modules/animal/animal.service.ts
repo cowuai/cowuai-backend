@@ -66,6 +66,16 @@ export class AnimalService {
         return animal;
     };
 
+    findByProprietario = async (idProprietario: bigint) => {
+        const animals = await animalRepository.findByProprietario(idProprietario);
+
+        if (animals.length === 0) {
+            throw new ApiError(404, "Nenhum animal encontrado para este proprietário");
+        }
+
+        return animals;
+    };
+
     findByProprietarioPaginated = async (
         idProprietario: bigint,
         page: number,
