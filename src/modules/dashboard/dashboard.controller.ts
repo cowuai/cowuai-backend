@@ -136,6 +136,29 @@ export const getDashboardData = async (req: Request, res: Response) => {
             where: {idProprietario: BigInt(userId)},
         });
 
+        // ------------------ ANIMAIS CADASTRADOS POR ANO -------------------
+        const animaisPorAno = await prisma.animal.findMany({
+            select: {dataNascimento: true},
+            where: {
+                fazenda: {
+                    idProprietario: BigInt(userId),
+                },
+                dataNascimento: {not: null},
+            },
+        });
+
+        const animaisPorAnoMap: Record<string, number> = {};
+        animaisPorAno.forEach(a => {
+            if (a.dataNascimento) {
+                const ano = new Date(a.dataNascimento).getFullYear().toString();
+                animaisPorAnoMap[ano] = (animaisPorAnoMap[ano] || 0) + 1;
+            }
+        });
+
+        const animaisCadastradosPorAno = Object.entries(animaisPorAnoMap)
+            .map(([ano, count]) => ({ano, count}))
+            .sort((a, b) => parseInt(a.ano) - parseInt(b.ano));
+
         // ------------------ MONTAGEM DO RESULTADO FINAL ------------------
         const taxaReproducao = totalAnimais > 0
             ? Math.round((animaisReprodutivos / totalAnimais) * 100)
@@ -151,7 +174,8 @@ export const getDashboardData = async (req: Request, res: Response) => {
             totalAnimais,
             totalAnimaisComRegistro,
             totalFazendasDoCriador,
-            totalAnimaisVendidos
+            totalAnimaisVendidos,
+            animaisCadastradosPorAno
         });
     } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
