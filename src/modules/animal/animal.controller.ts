@@ -91,6 +91,12 @@ export class AnimalController {
             const {idProprietario} = req.params;
             const {page, pageSize} = req.query;
 
+            // Se nenhum parâmetro de paginação for passado, retorna todos os animais
+            if (page === undefined && pageSize === undefined) {
+                const animals = await this.animalService.findByProprietario(BigInt(idProprietario));
+                return res.status(200).json({ data: animals });
+            }
+
             // Validar parâmetros de paginação (Query params são ‘strings’ por padrão)
             const pageNum = parseInt(page as string) || 1;
             const pageSizeNum = parseInt(pageSize as string) || 10;
