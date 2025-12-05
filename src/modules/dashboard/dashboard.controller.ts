@@ -151,6 +151,33 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             .map(([ano, count]) => ({ano, count}))
             .sort((a, b) => parseInt(a.ano) - parseInt(b.ano));
 
+         // ------------------ DOENÇAS ATIVAS POR FAZENDA ------------------
+        const doencasAtivas = await prisma.doencaAnimal.groupBy({
+            by: ["idDoenca"],
+            _count: {_all: true},
+            where: {
+                animal: {
+                    fazenda: {
+                        idProprietario: BigInt(userId),
+                    },
+                },
+                emTratamento: true,
+            },
+        });
+
+        const doencasPorFazenda = await Promise.all(
+            doencasAtivas.map(async (d) => {
+                const doenca = await prisma.doenca.findUnique({
+                    where: {id: d.idDoenca},
+                    select: {nome: true},
+                });
+                return {
+                    doenca,
+                    count: d._count._all,
+                };
+            })
+        );
+
         // ------------------ MONTAGEM DO RESULTADO FINAL ------------------
         const taxaReproducao = totalAnimais > 0
             ? Math.round((animaisReprodutivos / totalAnimais) * 100)
@@ -166,7 +193,8 @@ export const getDashboardData = async (req: Request, res: Response, next: NextFu
             totalAnimaisComRegistro,
             totalFazendasDoCriador,
             totalAnimaisVendidos,
-            animaisCadastradosPorAno
+            animaisCadastradosPorAno,
+            doencasPorFazenda
         });
     } catch (error) {
         next(error);
