@@ -3,9 +3,9 @@ import { AnimalController } from "./animal.controller";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { validateResource } from "../../middlewares/validateResource";
 import {
-    createAnimalSchema,
-    updateAnimalSchema,
-    getAnimalByIdSchema,
+  createAnimalSchema,
+  updateAnimalSchema,
+  getAnimalByIdSchema,
 } from "./animal.zodScheme";
 import { container } from "tsyringe";
 
@@ -117,7 +117,7 @@ const animalController = container.resolve(AnimalController);
  *
  *   get:
  *     summary: Lista todos os animais (Paginado)
- *     description: Retorna uma lista de animais com metadados de paginação.
+ *     description: Retorna uma lista de animais.
  *     tags:
  *       - Animais
  *     security:
@@ -141,7 +141,9 @@ const animalController = container.resolve(AnimalController);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/PaginationResponse'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Animal'
  *
  * /api/animais/id/{id}:
  *   get:
@@ -288,7 +290,7 @@ const animalController = container.resolve(AnimalController);
  *       '200':
  *         description: Animal atualizado.
  *         content:
- *           application/json:
+ *           application/json':
  *             schema:
  *               $ref: '#/components/schemas/Animal'
  *       '400':
@@ -312,51 +314,51 @@ const animalController = container.resolve(AnimalController);
  */
 
 router.post(
-    "/",
-    authMiddleware,
-    validateResource(createAnimalSchema),
-    animalController.create
+  "/",
+  authMiddleware,
+  validateResource(createAnimalSchema),
+  animalController.create
 );
 
 router.get("/", authMiddleware, animalController.findAll);
 
 router.get(
-    "/id/:id",
-    authMiddleware,
-    validateResource(getAnimalByIdSchema),
-    animalController.findById
+  "/id/:id",
+  authMiddleware,
+  validateResource(getAnimalByIdSchema),
+  animalController.findById
 );
 
 router.get(
-    "/relation/:id/:relation",
-    authMiddleware,
-    animalController.findByIdWithRelations
+  "/relation/:id/:relation",
+  authMiddleware,
+  animalController.findByIdWithRelations
 );
 
 router.get(
-    "/proprietario/:idProprietario",
-    authMiddleware,
-    animalController.findByProprietarioPaginated
+  "/proprietario/:idProprietario",
+  authMiddleware,
+  animalController.findByProprietarioPaginated
 );
 
 router.get(
-    "/fazenda/:idFazenda",
-    authMiddleware,
-    animalController.findByFazenda
+  "/fazenda/:idFazenda",
+  authMiddleware,
+  animalController.findByFazenda
 );
 
 router.put(
-    "/:id",
-    authMiddleware,
-    validateResource(updateAnimalSchema),
-    animalController.update
+  "/:id",
+  authMiddleware,
+  validateResource(updateAnimalSchema),
+  animalController.update
 );
 
 router.delete(
-    "/:id",
-    authMiddleware,
-    validateResource(getAnimalByIdSchema),
-    animalController.delete
+  "/:id",
+  authMiddleware,
+  validateResource(getAnimalByIdSchema),
+  animalController.delete
 );
 
 export default router;
