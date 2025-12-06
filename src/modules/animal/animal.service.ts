@@ -2,6 +2,7 @@ import {animalRepository} from "./animal.repository";
 import {Animal} from "@prisma/client";
 import {injectable} from "tsyringe";
 import {ApiError} from "../../types/ApiError";
+import {fazendaRepository} from "../fazenda/fazenda.repository";
 
 interface PaginatedAnimalsResult {
     animals: Animal[];
@@ -22,6 +23,20 @@ export class AnimalService {
 
         if (existingAnimal) {
             throw new ApiError(409, "Já existe um animal com esse número particular para este proprietário");
+        }
+
+        // Buscar informações da fazenda para concatenar o afixo com o nome do animal
+        if (data.idFazenda) {
+            const fazenda = await fazendaRepository.findById(data.idFazenda);
+            if (fazenda && fazenda.afixo) {
+                // Se prefixo = true, concatena como: AFIXO - NOME
+                // Se sufixo = true (prefixo = false), concatena como: NOME - AFIXO
+                if (fazenda.prefixo) {
+                    data.nome = `${fazenda.afixo} - ${data.nome}`;
+                } else if (fazenda.sufixo) {
+                    data.nome = `${data.nome} - ${fazenda.afixo}`;
+                }
+            }
         }
 
         return animalRepository.create(data);
@@ -53,10 +68,35 @@ export class AnimalService {
 
     findByProprietario = async (idProprietario: bigint) => {
         const animals = await animalRepository.findByProprietario(idProprietario);
-        if (!animals || animals.length === 0) {
+
+        if (animals.length === 0) {
             throw new ApiError(404, "Nenhum animal encontrado para este proprietário");
         }
+
         return animals;
+    };
+
+    findByProprietarioPaginated = async (
+        idProprietario: bigint,
+        page: number,
+        pageSize: number
+    ): Promise<PaginatedAnimalsResult> => {
+        const skip = (page - 1) * pageSize;
+
+        const animalsPromise = animalRepository.findByProprietarioPaginated(
+            idProprietario,
+            skip,
+            pageSize
+        );
+        const totalPromise = animalRepository.countByProprietario(idProprietario);
+
+        const [animals, total] = await Promise.all([animalsPromise, totalPromise]);
+
+        if (!total || total === 0) {
+            throw new ApiError(404, "Nenhum animal encontrado para este proprietário");
+        }
+
+        return {animals, total};
     };
 
     findByFazenda = async (idFazenda: bigint) => {

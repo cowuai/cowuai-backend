@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { AnimalController } from "./animal.controller";
 import { authMiddleware } from "../../middlewares/authMiddleware";
-import { validateResource } from "../../middlewares/validateResource"; // <--- Importante
+import { validateResource } from "../../middlewares/validateResource";
 import {
-  createAnimalSchema,
-  updateAnimalSchema,
-  getAnimalByIdSchema,
-} from "./animal.zodScheme"; // <--- Importante
+    createAnimalSchema,
+    updateAnimalSchema,
+    getAnimalByIdSchema,
+} from "./animal.zodScheme";
 import { container } from "tsyringe";
 
 const router = Router();
@@ -14,11 +14,61 @@ const animalController = container.resolve(AnimalController);
 
 /**
  * @swagger
+ * tags:
+ *   - name: Animais
+ *     description: Gerenciamento de animais (gado)
+ *
+ * components:
+ *   schemas:
+ *     Animal:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           format: int64
+ *         nome:
+ *           type: string
+ *         tipoRaca:
+ *           type: string
+ *         sexo:
+ *           type: string
+ *           enum: [MACHO, FEMEA]
+ *         dataNascimento:
+ *           type: string
+ *           format: date-time
+ *         peso:
+ *           type: number
+ *         status:
+ *           type: string
+ *         idFazenda:
+ *           type: integer
+ *         idProprietario:
+ *           type: integer
+ *     PaginationResponse:
+ *       type: object
+ *       properties:
+ *         data:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Animal'
+ *         pagination:
+ *           type: object
+ *           properties:
+ *             page:
+ *               type: integer
+ *             pageSize:
+ *               type: integer
+ *             totalItems:
+ *               type: integer
+ *             totalPages:
+ *               type: integer
+ *
  * /api/animais:
  *   post:
  *     summary: Cria um novo animal
- *     description: Adiciona um novo animal ao sistema (requer autenticação).
- *     tags: [Animais]
+ *     description: Adiciona um novo animal ao sistema.
+ *     tags:
+ *       - Animais
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -40,7 +90,7 @@ const animalController = container.resolve(AnimalController);
  *                 description: "Ex: NELORE, ANGUS, HOLANDES"
  *               sexo:
  *                 type: string
- *                 enum: [MACHO, FEMEA, TODOS]
+ *                 enum: [MACHO, FEMEA]
  *               dataNascimento:
  *                 type: string
  *                 format: date
@@ -54,20 +104,22 @@ const animalController = container.resolve(AnimalController);
  *               idFazenda:
  *                 type: number
  *     responses:
- *       "201":
+ *       '201':
  *         description: Animal criado com sucesso.
- *       "400":
- *         description: Falha na validação.
- *       "401":
- *         description: Acesso não autorizado.
- */
-/**
- * @swagger
- * /api/animais:
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Animal'
+ *       '400':
+ *         description: Falha na validação dos dados.
+ *       '401':
+ *         description: Não autorizado.
+ *
  *   get:
- *     summary: Lista todos os animais
- *     description: Retorna uma lista de animais (paginada).
- *     tags: [Animais]
+ *     summary: Lista todos os animais (Paginado)
+ *     description: Retorna uma lista de animais com metadados de paginação.
+ *     tags:
+ *       - Animais
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -75,22 +127,27 @@ const animalController = container.resolve(AnimalController);
  *         name: page
  *         schema:
  *           type: integer
+ *           default: 1
  *         description: Número da página
  *       - in: query
  *         name: pageSize
  *         schema:
  *           type: integer
+ *           default: 10
  *         description: Itens por página
  *     responses:
- *       "200":
+ *       '200':
  *         description: Lista retornada com sucesso.
- */
-/**
- * @swagger
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaginationResponse'
+ *
  * /api/animais/id/{id}:
  *   get:
  *     summary: Busca animal por ID
- *     tags: [Animais]
+ *     tags:
+ *       - Animais
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -101,17 +158,107 @@ const animalController = container.resolve(AnimalController);
  *           type: integer
  *         description: ID do animal
  *     responses:
- *       "200":
+ *       '200':
  *         description: Animal encontrado.
- *       "404":
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Animal'
+ *       '404':
  *         description: Animal não encontrado.
- */
-/**
- * @swagger
+ *
+ * /api/animais/relation/{id}/{relation}:
+ *   get:
+ *     summary: Busca relações do animal (Pais, Filhos, Vacinas)
+ *     tags:
+ *       - Animais
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do animal base
+ *       - in: path
+ *         name: relation
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [pais, filhos, vacinacoes]
+ *         description: Tipo de relação desejada
+ *     responses:
+ *       '200':
+ *         description: Dados relacionados retornados.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Animal'
+ *       '400':
+ *         description: Relação inválida.
+ *
+ * /api/animais/proprietario/{idProprietario}:
+ *   get:
+ *     summary: Lista animais por Proprietário (Paginado)
+ *     tags:
+ *       - Animais
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: idProprietario
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do proprietário
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       '200':
+ *         description: Lista de animais do proprietário.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PaginationResponse'
+ *
+ * /api/animais/fazenda/{idFazenda}:
+ *   get:
+ *     summary: Lista animais por Fazenda (Sem paginação)
+ *     tags:
+ *       - Animais
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: idFazenda
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da fazenda
+ *     responses:
+ *       '200':
+ *         description: Lista de animais da fazenda.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Animal'
+ *
  * /api/animais/{id}:
  *   put:
  *     summary: Atualiza um animal
- *     tags: [Animais]
+ *     tags:
+ *       - Animais
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -138,17 +285,19 @@ const animalController = container.resolve(AnimalController);
  *               status:
  *                 type: string
  *     responses:
- *       "200":
+ *       '200':
  *         description: Animal atualizado.
- *       "400":
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Animal'
+ *       '400':
  *         description: Erro de validação.
- */
-/**
- * @swagger
- * /api/animais/{id}:
+ *
  *   delete:
  *     summary: Exclui um animal
- *     tags: [Animais]
+ *     tags:
+ *       - Animais
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -158,62 +307,56 @@ const animalController = container.resolve(AnimalController);
  *         schema:
  *           type: integer
  *     responses:
- *       "200":
- *         description: Animal excluído.
+ *       '204':
+ *         description: Animal excluído com sucesso (Sem conteúdo).
  */
 
-// --- DEFINIÇÃO DAS ROTAS ---
-
-// 1. Rota POST (Com validação do Body)
 router.post(
-  "/",
-  authMiddleware,
-  validateResource(createAnimalSchema), // <--- Validação Zod aqui
-  animalController.create
+    "/",
+    authMiddleware,
+    validateResource(createAnimalSchema),
+    animalController.create
 );
 
-// 2. Rota GET Geral
 router.get("/", authMiddleware, animalController.findAll);
 
-// 3. Rota GET por ID (Com validação do ID na URL)
 router.get(
-  "/id/:id",
-  authMiddleware,
-  validateResource(getAnimalByIdSchema),
-  animalController.findById
+    "/id/:id",
+    authMiddleware,
+    validateResource(getAnimalByIdSchema),
+    animalController.findById
 );
 
-// Rotas específicas (ainda sem schema específico de validação de param, confiando no controller)
 router.get(
-  "/relation/:id/:relation",
-  authMiddleware,
-  animalController.findByIdWithRelations
-);
-router.get(
-  "/proprietario/:idProprietario",
-  authMiddleware,
-  animalController.findByProprietario
-);
-router.get(
-  "/fazenda/:idFazenda",
-  authMiddleware,
-  animalController.findByFazenda
+    "/relation/:id/:relation",
+    authMiddleware,
+    animalController.findByIdWithRelations
 );
 
-// 4. Rota PUT (Com validação de ID e Body)
+router.get(
+    "/proprietario/:idProprietario",
+    authMiddleware,
+    animalController.findByProprietarioPaginated
+);
+
+router.get(
+    "/fazenda/:idFazenda",
+    authMiddleware,
+    animalController.findByFazenda
+);
+
 router.put(
-  "/:id",
-  authMiddleware,
-  validateResource(updateAnimalSchema),
-  animalController.update
+    "/:id",
+    authMiddleware,
+    validateResource(updateAnimalSchema),
+    animalController.update
 );
 
-// 5. Rota DELETE (Com validação de ID)
 router.delete(
-  "/:id",
-  authMiddleware,
-  validateResource(getAnimalByIdSchema),
-  animalController.delete
+    "/:id",
+    authMiddleware,
+    validateResource(getAnimalByIdSchema),
+    animalController.delete
 );
 
 export default router;
